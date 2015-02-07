@@ -10,7 +10,7 @@ import socket
 host = ''
 
 # Anything large we don't think is being used
-port = 8005
+port = 54321
 
 backlog = 5
 BufferSize = 1024
@@ -18,7 +18,7 @@ BufferSize = 1024
 
 
 # Creates a socket object that will use TCP and IPV4
-s = socket.socket(socket.AF_INET, socekt.SOCK_STREAM)
+s = socket.socket(socket.AF_INET,socket.SOCK_STREAM)
 
 """
 Binds the socket to the host and port
@@ -59,3 +59,18 @@ while 1:
         client.send(data) 
     client.close()
 
+
+
+""" 
+
+When listening, to kill in windows:
+
+> netstat -a -n -operator
+
+Then find the PID of the open port at 54321
+
+> taskkill /PID 10000
+
+where 10000 is the PID of the socket.
+
+"""
