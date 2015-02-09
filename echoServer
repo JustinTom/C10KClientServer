@@ -17,6 +17,7 @@ BufferSize = 1024
 
 
 
+
 # Creates a socket object that will use TCP and IPV4
 s = socket.socket(socket.AF_INET,socket.SOCK_STREAM)
 
@@ -27,7 +28,7 @@ to our destination our host address and port.
 This call will fail if some other application is already using this port
 on the same machine
 """
-
+print port 
 s.bind((host,port))
 
 """
