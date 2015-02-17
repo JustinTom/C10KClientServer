@@ -4,15 +4,61 @@
 A simple echo client 
 """ 
 
-import socket 
+from socket import *
+import threading
+import time
+import random
 
-host = 'localhost' 
-port = 54321 
-size = 1024 
-s = socket.socket(socket.AF_INET, socket.SOCK_STREAM) 
-s.connect((host,port)) 
-s.send('Hello, world') 
-data = s.recv(size) 
-s.close() 
-print 'Received:', data
+
+
+
+
+clients = int(input('Enter number of clients: '))
+message = raw_input('Enter a message to send: ')
+port = int(input('Enter the port: '))
+host = raw_input('Enter the server IP: ')
+#host = '192.168.0.23'
+
+
+
+
+
+def run (clientNumber):
+    global host
+    #port = 55573
+    buf = 1024
+    global host
+    global message
+
+
+    s = socket(AF_INET, SOCK_STREAM)
+
+    s.connect((host,port))
+
+    while 1:
+        cData = message + str(clientNumber)
+        s.send(cData.encode('utf-8'))
+        print "Sent: " + data + '\n'
+        sData = s.recv(buf)
+        print "Received: " + data + '\n'
+        t = random.randint(0, 9)
+        time.sleep(t)
+
+
+
+if __name__ == '__main__':
+    threads = []
+    for x in range ( clients ):
+    
+        thread = threading.Thread(target = run, args = [x])
+        thread.start()
+        threads.append(thread)
+
+    for thread in threads:
+        thread.join()
+
+
+
+
+
 
