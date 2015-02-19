@@ -9,19 +9,12 @@ import threading
 import time
 import random
 
-
-
-
-port = int(input('Enter the port: '))
 host = raw_input('Enter the server IP: ')
+port = int(input('Enter the port: '))
 clients = int(input('Enter number of clients: '))
 message = raw_input('Enter a message to send: ')
 msgMultiple = int(input('Enter the number of times you would like to send the message: '))
 buf = 1024
-
-
-
-
 
 
 def run (clientNumber):
@@ -51,9 +44,3 @@ if __name__ == '__main__':
 
     for thread in threads:
         thread.join()
-
-
-
-
-
-
