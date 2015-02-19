@@ -5,3 +5,9 @@ epollSelectServer (Listen backlog queue size at 10,000)
 	- As soon as we connected our 4th client with another 10,000 connections, the server broke at exactly 30,004 concurrent connections
 		- Error was at line 43: data = receiveSock.recv(bufferSize) "socket.error: [Errno 104] Connection reset by peer"
 	- Data being sent over was "Hi", "Howdy", "Hello"
+	- CSV file
+		- Started at 5000 connections
+		- Increment of 100
+		- Data send - 1024 bytes
+		- Volleys of data - 2
+		- 12 Clients

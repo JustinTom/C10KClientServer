@@ -12,7 +12,7 @@ serversocket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 #serversocket.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
 serversocket.bind((hostIP, port))
 #The listen backlog queue size
-serversocket.listen(50)
+serversocket.listen(10000)
 #Since sockets are blocking by default, this is necessary to use non-blocking (asynchronous) mode.
 serversocket.setblocking(0)
 
@@ -41,9 +41,9 @@ try:
             elif event & select.EPOLLIN:
                 receiveSock = requests.get(fileno)
                 data = receiveSock.recv(bufferSize)
-                clientIP, clientSocket = receiveSock.getpeername()
-            	print 'Currently connected clients: ' + str(counter) + '\n'
-                print 'Data (' + clientIP + ':' + str(clientSocket) + ') = ' + data + '\n'
+                #clientIP, clientSocket = receiveSock.getpeername()
+                print 'Currently connected clients: ' + str(counter)
+                #print 'Data(' + clientIP + ':' + str(clientSocket) + ') = ' + data + '\n'
                 receiveSock.send(data)
             elif event & select.EPOLLERR:
                 counter-=1
