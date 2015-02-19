@@ -4,7 +4,7 @@
 --  PROGRAM:        Select method server using epoll
 --                  python epollSelectServer.py
 --
---  FUNCTIONS:      run(hostIP, port), close()
+--  FUNCTIONS:      run(hostIP, port), close(epoll, serversocket, counter, dataTotal), getTime()
 --
 --  DATE:           February 10, 2015
 --
@@ -28,6 +28,7 @@ import socket
 import select
 import thread
 import datetime
+import time
 
 '''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''
 --  FUNCTION
@@ -79,17 +80,16 @@ def run(hostIP, port):
                     #Register interest in read (EPOLLIN) events for the new socket.
                     epoll.register(clientConnection.fileno(), select.EPOLLIN)
                     #Connected clients print moved to after register due to multiple prints showing same number
-                    text_file.write("Currently connected clients: " + str(counter) + '\n')
+                    text_file.write(str(getTime()) + "Currently connected clients: " + str(counter) + '\n')
                     print 'Currently connected clients: ' + str(counter)
                 elif event & select.EPOLLIN:
                     receiveSock = requests.get(fileno)
                     data = receiveSock.recv(bufferSize)
                     clientIP, clientSocket = receiveSock.getpeername()
                     #print 'Currently connected clients: ' + str(counter)
-                    timeStamp = datetime.datetime.fromtimestamp(ts).strftime('%Y-%m-%d %H:%M:%S')
                     dataSize = len(data)
                     dataTotal += dataSize
-                    text_file.write(timeStamp + " - Size of data received (" + clientIP + ":" + str(clientSocket) + ") = " + dataSize + '\n')
+                    text_file.write(str(getTime()) + " - Size of data received (" + clientIP + ":" + str(clientSocket) + ") = " + str(dataSize) + '\n')
                     #print 'Data(' + clientIP + ':' + str(clientSocket) + ') = ' + data + '\n'
                     receiveSock.send(data)
                 elif event & select.EPOLLERR:
@@ -97,7 +97,7 @@ def run(hostIP, port):
                 elif event & select.EPOLLHUP:
                     counter-=1
     except KeyboardInterrupt:
-        close()
+        close(epoll, serversocket, counter, dataTotal)
 
 '''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''
 --  FUNCTION
@@ -105,33 +105,53 @@ def run(hostIP, port):
 --  Developer:  Kyle Gilles, Justin Tom
 --  Created On: Feb. 10, 2015
 --  Parameters:
---      hostIP
---          the IP address of the host
---      port
---          the port to listen on
+--      epoll
+--          Required to pass the variable to the next function
+--      serversocket
+--          Required to pass the variable to the next function
+--      counter
+--          Required to pass the variable to the next function
+--      dataTotal  
+--          Required to pass the variable to the next function
 --  Return Values:
---    none
+--      none
 --  Description:
---    Cleans up and closes the epoll objects, and sockets as well as closing the text file.
+--    Cleans up and closes the epoll objects, and sockets as well as closing the log text file.
 '''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''  
-def close():
+def close(epoll, serversocket, counter, dataTotal):
     epoll.unregister(serversocket.fileno())
     epoll.close()
-    print ("Closing the server...")
+    print ("\nClosing the server...")
     serversocket.close()
 
-    text_file.write("\n\nTotal number of connections: " + counter)
-    text_file.write("\nTotal amount of data transferred: " + dataTotal)
+    text_file.write("\n\nTotal number of connections: " + str(counter))
+    text_file.write("\nTotal amount of data transferred: " + str(dataTotal))
     text_file.close()
     return
+
+'''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''
+--  FUNCTION
+--  Name:       getTime
+--  Developer:  Justin Tom
+--  Created On: Feb. 18, 2015
+--  Parameters:
+--      none
+--  Return Values:
+--      timeStamp
+--          The current time of when the function was called
+--  Description:
+--    Returns the current time of when the function was called in a Y-M-D H:M:S format
+'''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''  
+def getTime():
+    ts = time.time()
+    timeStamp = datetime.datetime.fromtimestamp(ts).strftime('%Y-%m-%d_%H:%M:%S')
+    return timeStamp
 
 if __name__ == '__main__':
     hostIP = raw_input('Enter your host IP \n')
     port = int(input('What port would you like to use?\n'))
 
-    curTime = datetime.now().strftime('%Y-%m-%d_%H.%M.%S')
-
     #Create and initialize the text file with the date in the filename
-    text_file = open(curTime + "_SelectServerLog.txt", "w")
+    text_file = open(str(getTime()) + "_SelectServerLog.txt", "w")
 
     run(hostIP, port)

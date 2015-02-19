@@ -52,7 +52,7 @@ msgMultiple = 1
 '''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''  
 def run (clientNumber):
     buf = 1024
-
+    global totalTime
     s = socket(AF_INET, SOCK_STREAM)
     s.connect((host,port))
 
@@ -72,14 +72,15 @@ def run (clientNumber):
             time.sleep(t)
 
 if __name__ == '__main__': 
-    global host = raw_input('Enter the server IP: ')
-    global port = int(input('Enter the port: '))
+    host = raw_input('Enter the server IP: ')
+    port = int(input('Enter the port: '))
     clients = int(input('Enter number of clients: '))
-    global message = raw_input('Enter a message to send: ')
-    global msgMultiple = int(input('Enter the number of times you would like to send the message: '))
+    message = raw_input('Enter a message to send: ')
+    msgMultiple = int(input('Enter the number of times you would like to send the message: '))
     
     threads = []
     totalTime = 0
+    
     for x in range ( clients ):
     
         thread = threading.Thread(target = run, args = [x])
@@ -90,7 +91,7 @@ if __name__ == '__main__':
         thread.join()
 
     bytes = sys.getsizeof(message)
-    totalRequests = clients * numberOfMessages
+    totalRequests = clients * msgMultiple
     totalBytes = totalRequests * bytes
     averageRTT = totalTime / totalRequests
     print("Bytes sent in message was : " + str(bytes))

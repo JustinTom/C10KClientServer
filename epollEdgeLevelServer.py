@@ -1,5 +1,5 @@
 '''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''
---  SOURCE FILE:    epollEdgeLevelSelect.py - A simple echo server using the level triggered interface of the epoll API
+--  SOURCE FILE:    epollEdgeLevelSelect.py - A multi-threaded echo server using the level triggered interface of the epoll API
 --
 --  PROGRAM:        Select method server using epoll
 --                  python epollSelectServer.py
@@ -28,6 +28,8 @@ import socket
 import select
 import thread
 import threading
+import datetime
+import time
 
 '''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''
 --  FUNCTION
@@ -50,49 +52,70 @@ def threadFunc():
     global buffersize
     global serversocket
     
-    #The connection dictionary maps file descriptors (integers) to their corresponding network connection objects.
-    while running:
-        events = epoll.poll(-1)
-        for fileno, event in events:
-            if fileno == serversocket.fileno():
+    try:
+        while running:
+            events = epoll.poll(-1)
+            for fileno, event in events:
+                if fileno == serversocket.fileno():
 
-                clientConnection, clientAddress = serversocket.accept()
-                counter+=1
-                clientConnection.setblocking(0)
-                requests.update({clientConnection.fileno(): clientConnection})
-                epoll.register(clientConnection.fileno(), select.EPOLLIN | select.EPOLLET)
-                print 'Currently connected clients: ' + str(counter)
+                    clientConnection, clientAddress = serversocket.accept()
+                    counter+=1
+                    clientConnection.setblocking(0)
+                    requests.update({clientConnection.fileno(): clientConnection})
+                    epoll.register(clientConnection.fileno(), select.EPOLLIN | select.EPOLLET)
+                    text_file.write("Currently connected clients: " + str(counter) + '\n')
+                    print 'Currently connected clients: ' + str(counter)
 
-            elif event & select.EPOLLIN:
-                receiveSock = requests.get(fileno)
-                clientConnection = requests.get(fileno)
- 
-		try:
+                elif event & select.EPOLLIN:
+                    receiveSock = requests.get(fileno)
+                    clientConnection = requests.get(fileno)
+                    clientIP, clientSocket = receiveSock.getpeername()
+                    #print 'Currently connected clients: ' + str(counter)
+                    timeStamp = datetime.datetime.fromtimestamp(ts).strftime('%Y-%m-%d %H:%M:%S')
+                    dataSize = len(data)
+                    dataTotal += dataSize
+                    text_file.write(str(timeStamp) + " - Size of data received (" + clientIP + ":" + str(clientSocket) + ") = " + str(dataSize) + '\n')
                     data = receiveSock.recv(bufferSize)
-                    if data!=0:
-                        
-                        #
-                        #print 'Data: ' + data
-                        receiveSock.send(data)
-		except:
-                    counter-= 1
-                    pass
-	"""
-            elif event & select.EPOLLERR:
-                counter-=1
-            elif event & select.EPOLLHUP:
-                counter-=1
+                    receiveSock.send(data)
+                elif event & select.EPOLLERR:
+                    counter-=1
+                elif event & select.EPOLLHUP:
+                    counter-=1
+    except KeyboardInterrupt:
+        close()
 
-finally:
+'''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''
+--  FUNCTION
+--  Name:       close
+--  Developer:  Kyle Gilles, Justin Tom
+--  Created On: Feb. 10, 2015
+--  Parameters:
+--      none
+--  Return Values:
+--      none
+--  Description:
+--    Cleans up and closes the epoll objects, and sockets as well as closing the log text file.
+'''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''  
+def close():
     epoll.unregister(serversocket.fileno())
     epoll.close()
+    print ("Closing the server...")
     serversocket.close()
-"""
+
+    text_file.write("\n\nTotal number of connections: " + counter)
+    text_file.write("\nTotal amount of data transferred: " + dataTotal)
+    text_file.close()
 
 if __name__=="__main__":
-
     hostIP = raw_input('Enter your host IP \n')
     port = int(input('What port would you like to use?\n'))
+
+    ts = time.time()
+    curTime = datetime.now().strftime('%Y-%m-%d_%H.%M.%S')
+
+    #Create and initialize the text file with the date in the filename
+    text_file = open(curTime + "_EpollServerLog.txt", "w")
+
     requests = {}
     running = 1
     bufferSize = 1024
