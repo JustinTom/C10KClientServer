@@ -1,10 +1,10 @@
 '''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''
---  SOURCE FILE:        epoll_svr.c -   A simple echo server using the epoll API
+--  SOURCE FILE:    epollSelectServer.py - A simple echo server using the level triggered interface of the epoll API
 --
---  PROGRAM:        epolls
---              gcc -Wall -ggdb -o epolls epoll_svr.c  
+--  PROGRAM:        Select method server using epoll
+--                  python epollSelectServer.py
 --
---  FUNCTIONS:      close
+--  FUNCTIONS:      run(hostIP, port), close()
 --
 --  DATE:           February 10, 2015
 --
@@ -12,14 +12,15 @@
 --
 --  DESIGNERS:      Kyle Gilles, Justin Tom
 --
---  PROGRAMMERS:    Justin Tom, Kyle Gilles
+--  PROGRAMMERS:    Kyle Gilles, Justin Tom
 --
 --  NOTES:
 --  The program will accept TCP connections from client machines.
 --  The program will read data from the client socket and simply echo it back.
 --  Design is a simple, single-threaded server using non-blocking, edge-triggered
 --  I/O to handle simultaneous inbound connections. 
---  Test with accompanying client application: epoll_clnt.c
+--  The program will also keep a log file of the number of connections and all data being echoed.
+--  Test with accompanying client application: echoClient.py
 '''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''
 #!/usr/bin/env python
 
@@ -28,17 +29,21 @@ import select
 import thread
 import datetime
 
-def close():
-    epoll.unregister(serversocket.fileno())
-    epoll.close()
-    print ("Closing the server...")
-    serversocket.close()
-
-    text_file.write("\n\nTotal number of connections: " + counter)
-    text_file.write("\nTotal amount of data transferred: " + dataTotal)
-    text_file.close()
-    return
-
+'''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''
+--  FUNCTION
+--  Name:       run
+--  Developer:  Kyle Gilles, Justin Tom
+--  Created On: Feb. 10, 2015
+--  Parameters:
+--      hostIP
+--          the IP address of the host
+--      port
+--          the port to listen on
+--  Return Values:
+--    none
+--  Description:
+--    A simple one process per client echo server
+'''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''  
 def run(hostIP, port):
     running = 1
     counter = 0
@@ -92,6 +97,32 @@ def run(hostIP, port):
                     counter-=1
     except KeyboardInterrupt:
         close()
+
+'''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''
+--  FUNCTION
+--  Name:       close
+--  Developer:  Kyle Gilles, Justin Tom
+--  Created On: Feb. 10, 2015
+--  Parameters:
+--      hostIP
+--          the IP address of the host
+--      port
+--          the port to listen on
+--  Return Values:
+--    none
+--  Description:
+--    Cleans up and closes the epoll objects, and sockets as well as closing the text file.
+'''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''  
+def close():
+    epoll.unregister(serversocket.fileno())
+    epoll.close()
+    print ("Closing the server...")
+    serversocket.close()
+
+    text_file.write("\n\nTotal number of connections: " + counter)
+    text_file.write("\nTotal amount of data transferred: " + dataTotal)
+    text_file.close()
+    return
 
 if __name__ == '__main__':
     hostIP = raw_input('Enter your host IP \n')
