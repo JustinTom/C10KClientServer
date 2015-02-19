@@ -1,5 +1,5 @@
 '''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''
---  SOURCE FILE:    epollSelectServer.py - A simple echo server using the level triggered interface of the epoll API
+--  SOURCE FILE:    epollSelectServer.py - A simple echo server using the edge triggered interface of the epoll API
 --
 --  PROGRAM:        Select method server using epoll
 --                  python epollSelectServer.py
@@ -10,7 +10,7 @@
 --
 --  REVISIONS:      February 18, 2015
 --
---  DESIGNERS:      Kyle Gilles, Justin Tom
+--  DESIGNERS:      Justin Tom
 --
 --  PROGRAMMERS:    Kyle Gilles, Justin Tom
 --
@@ -40,9 +40,10 @@ import datetime
 --      port
 --          the port to listen on
 --  Return Values:
---    none
+--      none
 --  Description:
---    A simple one process per client echo server
+--      Listens on the specified socket for incoming data, sets a counter for connected clientSocket
+--      and echoes back the received data.
 '''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''  
 def run(hostIP, port):
     running = 1

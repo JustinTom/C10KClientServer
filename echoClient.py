@@ -31,11 +31,10 @@ import time
 import random
 import sys
 
-host = raw_input('Enter the server IP: ')
-port = int(input('Enter the port: '))
-clients = int(input('Enter number of clients: '))
-message = raw_input('Enter a message to send: ')
-msgMultiple = int(input('Enter the number of times you would like to send the message: '))
+host = ""
+port = 8005
+message = ""
+msgMultiple = 1
 
 '''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''
 --  FUNCTION
@@ -72,7 +71,13 @@ def run (clientNumber):
             t = random.randint(0, 9)
             time.sleep(t)
 
-if __name__ == '__main__':
+if __name__ == '__main__': 
+    global host = raw_input('Enter the server IP: ')
+    global port = int(input('Enter the port: '))
+    clients = int(input('Enter number of clients: '))
+    global message = raw_input('Enter a message to send: ')
+    global msgMultiple = int(input('Enter the number of times you would like to send the message: '))
+    
     threads = []
     totalTime = 0
     for x in range ( clients ):
