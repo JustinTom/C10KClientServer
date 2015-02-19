@@ -12,9 +12,9 @@ serversocket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 #serversocket.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
 serversocket.bind((hostIP, port))
 #The listen backlog queue size
-serversocket.listen(2)
+serversocket.listen(50)
 #Since sockets are blocking by default, this is necessary to use non-blocking (asynchronous) mode.
-##serversocket.setblocking(0)
+serversocket.setblocking(0)
 
 #Create an epoll object.
 epoll = select.epoll()
@@ -41,12 +41,10 @@ try:
             elif event & select.EPOLLIN:
                 receiveSock = requests.get(fileno)
                 data = receiveSock.recv(bufferSize)
-                #clientIP, clientSocket = socket.getnameinfo()
+                clientIP, clientSocket = receiveSock.getpeername()
             	print 'Currently connected clients: ' + str(counter) + '\n'
-                print 'Data: ' + data + '\n'
-                #print 'Connected Client: ' + clientIP + ':' + clientSocket + '\n'
-                #receiveSock.send(data)
-            #If a write event occurred on a client socket, it's able to accept new data to send to the client.
+                print 'Data (' + clientIP + ':' + str(clientSocket) + ') = ' + data + '\n'
+                receiveSock.send(data)
             elif event & select.EPOLLERR:
                 counter-=1
             elif event & select.EPOLLHUP:

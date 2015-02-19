@@ -12,38 +12,33 @@ import random
 
 
 
-
-clients = int(input('Enter number of clients: '))
-message = raw_input('Enter a message to send: ')
 port = int(input('Enter the port: '))
 host = raw_input('Enter the server IP: ')
-#host = '192.168.0.23'
+clients = int(input('Enter number of clients: '))
+message = raw_input('Enter a message to send: ')
+msgMultiple = int(input('Enter the number of times you would like to send the message: '))
+buf = 1024
+
 
 
 
 
 
 def run (clientNumber):
-    global host
-    #port = 55573
-    buf = 1024
-    global host
-    global message
-
-
     s = socket(AF_INET, SOCK_STREAM)
 
     s.connect((host,port))
 
     while 1:
-        cData = message + str(clientNumber)
-        s.send(cData.encode('utf-8'))
-        print "Sent: " + data + '\n'
-        sData = s.recv(buf)
-        print "Received: " + data + '\n'
-        t = random.randint(0, 9)
-        time.sleep(t)
-
+        for _ in range( msgMultiple ):
+            #cData = message + str(clientNumber)
+            cData = message
+            s.send(cData.encode('utf-8'))
+            print "Sent: " + cData
+            sData = s.recv(buf)
+            print "Received: " + cData + '\n'
+            t = random.randint(0, 9)
+            time.sleep(t)
 
 
 if __name__ == '__main__':
