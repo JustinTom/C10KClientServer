@@ -1,8 +1,8 @@
 '''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''
 --  SOURCE FILE:    EpollEdgeServer.py - A simple echo server using the edge triggered interface of the epoll API
 --
---  PROGRAM:        Select method server using epoll edge-triggered
---                  python epollSelectServer.py
+--  PROGRAM:        Epoll method server using epoll edge-triggered
+--                  python epollEdgeServer.py
 --
 --  FUNCTIONS:      run(hostIP, port), close()
 --
