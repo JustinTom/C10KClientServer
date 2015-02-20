@@ -80,15 +80,15 @@ def run(hostIP, port):
                     try:
                         data = receiveSock.recv(bufferSize)
                         receiveSock.send(data)
-                    except:
+		    except:
                         pass
     except KeyboardInterrupt:
         print ("\nA keyboardInterruption has occured.")
-        close(epoll, serversocket, counter, dataTotal)
+        close(epoll, serversocket)
     
     except Exception,e:
         print ("Unknown Error has occured." + str(e))
-        close(epoll, serversocket, counter, dataTotal)
+        close(epoll, serversocket)
 
 '''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''
 --  FUNCTION
@@ -96,7 +96,10 @@ def run(hostIP, port):
 --  Developer:  Kyle Gilles, Justin Tom
 --  Created On: Feb. 10, 2015
 --  Parameters:
---      none
+--      epoll
+--          Required to pass the variable to the next function
+--      serversocket
+--          Required to pass the variable to the next function
 --  Return Values:
 --      none
 --  Description:
