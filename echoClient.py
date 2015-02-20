@@ -76,7 +76,7 @@ def run (clientNumber):
             print "Received: " + cData + '\n'
             t = random.randint(0, 9)
             time.sleep(t)
-        text_file.write("\nClient " + str(clientNumber) + " RTT time taken for " + str(msgMultiple) + " messages was: " + str(threadRTT) + " seconds.)
+        text_file.write("\nClient " + str(clientNumber) + " RTT time taken for " + str(msgMultiple) + " messages was: " + str(threadRTT) + " seconds.")
         threadRTT = 0
         break
 
