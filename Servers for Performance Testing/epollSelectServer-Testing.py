@@ -49,7 +49,6 @@ def run(hostIP, port):
     bufferSize = 1024
     dataTotal = 0
     serversocket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-    #serversocket.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
     serversocket.bind((hostIP, port))
     #The listen backlog queue size
     serversocket.listen(10000)
@@ -116,21 +115,6 @@ def close(epoll, serversocket,):
     print ("\nClosing the server...")
     serversocket.close()
 
-    return
-
-'''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''
---  FUNCTION
---  Name:       getTime
---  Developer:  Justin Tom
---  Created On: Feb. 18, 2015
---  Parameters:
---      none
---  Return Values:
---      timeStamp
---          The current time of when the function was called
---  Description:
---    Returns the current time of when the function was called in a Y-M-D H:M:S format
-'''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''  
 
 if __name__ == '__main__':
     hostIP = raw_input('Enter your host IP \n')
