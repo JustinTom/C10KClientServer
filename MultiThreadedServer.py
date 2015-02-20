@@ -35,7 +35,7 @@ if __name__ == "__main__":
     connections = []
 
     host = 'localhost'
-    port = 55573
+    port = 8005
     buf = 1024
  
     addr = (host, port)
