@@ -47,15 +47,19 @@ import sys
 '''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''  
 
 def threadHandler(clientsocket, clientaddr):
-    global dataTotal
+    global dataReceivedTotal
+    global dataSentTotal
     while 1:
         
         data = clientsocket.recv(bufferSize)
         clientIP, clientSocket = clientsocket.getpeername()
-        dataSize = len(data)
-        dataTotal += dataSize
-        text_file.write(str(getTime()) + " - Size of data received (" + clientIP + ":" + str(clientSocket) + ") = " + str(dataSize) + '\n')
+        dataRSize = len(data)
+        dataReceivedTotal += dataRSize
+        text_file.write(str(getTime()) + " - Size of data received (" + clientIP + ":" + str(clientSocket) + ") = " + str(dataRSize) + '\n')
         clientsocket.send(data)
+        dataSSize = len(data)
+        dataSentTotal += dataSSize
+        text_file.write(str(getTime()) + " - Size of data sent (" + clientIP + ":" + str(clientSocket) + ") = " + str(dataSSize) + '\n')
         
 '''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''
 --  FUNCTION
@@ -79,7 +83,8 @@ def threadHandler(clientsocket, clientaddr):
 def close():
     print ("Closing the server...")
     text_file.write("\n\nTotal number of connections: " + str(counter))
-    text_file.write("\nTotal amount of data transferred: " + str(dataTotal))
+    text_file.write("\nTotal amount of data received: " + str(dataReceivedTotal))
+    text_file.write("\nTotal amount of data sent: " + str(dataSentTotal))
     text_file.close()
     sys.exit()
           

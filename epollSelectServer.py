@@ -84,24 +84,25 @@ def run(hostIP, port):
                     receiveSock = requests.get(fileno)
                     data = receiveSock.recv(bufferSize)
                     clientIP, clientSocket = receiveSock.getpeername()
-                    #print 'Currently connected clients: ' + str(counter)
-                    dataSize = len(data)
-                    dataTotal += dataSize
-                    text_file.write(str(getTime()) + " - Size of data received (" + clientIP + ":" + str(clientSocket) + ") = " + str(dataSize) + '\n')
-                    #print 'Data(' + clientIP + ':' + str(clientSocket) + ') = ' + data + '\n'
-                    receiveSock.send(data)
+                    dataRSize = len(data)
+                    dataReceivedTotal += dataRSize
+                    text_file.write(str(getTime()) + " - Size of data received (" + clientIP + ":" + str(clientSocket) + ") = " + str(dataRSize) + '\n')
+                    clientsocket.send(data)
+                    dataSSize = len(data)
+                    dataSentTotal += dataSSize
+                    text_file.write(str(getTime()) + " - Size of data sent (" + clientIP + ":" + str(clientSocket) + ") = " + str(dataSSize) + '\n')
                 elif event & select.EPOLLERR:
                     counter-=1
                 elif event & select.EPOLLHUP:
                     counter-=1
     #Handle keyboard interrupts (Mainly ctrl+c)
     except KeyboardInterrupt:
-        close(epoll, serversocket, counter, dataTotal)
+        close(epoll, serversocket, counter, dataReceivedTotal, dataSentTotal)
         print ("\nA keyboardInterruption has occured.")
     #Handle all other exceptions in hopes to close 'cleanly'
     except Exception,e:
         print ("Server connection has ran into an unexpected error: " + str(e))
-        close(epoll, serversocket, counter, dataTotal) 
+        close(epoll, serversocket, counter, dataReceivedTotal, dataSentTotal) 
 
 '''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''
 --  FUNCTION
@@ -115,21 +116,24 @@ def run(hostIP, port):
 --          Required to pass the variable to the next function
 --      counter
 --          Required to pass the variable to the next function
---      dataTotal  
+--      dataReceivedTotal
+--          Required to pass the variable to the next function
+--      dataSentTotal
 --          Required to pass the variable to the next function
 --  Return Values:
 --      none
 --  Description:
 --    Cleans up and closes the epoll objects, and sockets as well as closing the log text file.
 '''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''  
-def close(epoll, serversocket, counter, dataTotal):
+def close(epoll, serversocket, counter, dataReceivedTotal, dataSentTotal):
     epoll.unregister(serversocket.fileno())
     epoll.close()
     print ("\nClosing the server...")
     serversocket.close()
 
     text_file.write("\n\nTotal number of connections: " + str(counter))
-    text_file.write("\nTotal amount of data transferred: " + str(dataTotal))
+    text_file.write("\nTotal amount of data received: " + str(dataReceivedTotal))
+    text_file.write("\nTotal amount of data sent: " + str(dataSentTotal))
     text_file.close()
 
     return
