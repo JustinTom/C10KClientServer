@@ -30,11 +30,16 @@ import threading
 import time
 import random
 import sys
+import logging
+import datetime
 
 host = ""
 port = 8005
 message = ""
 msgMultiple = 1
+ts = time.time() 
+curTime = datetime.datetime.fromtimestamp(ts).strftime('%Y-%m-%d_%H.%M.%S')
+text_file = open(curTime +"_ClientLog.txt", "w")
 
 '''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''
 --  FUNCTION
@@ -55,21 +60,25 @@ def run (clientNumber):
     global totalTime
     s = socket(AF_INET, SOCK_STREAM)
     s.connect((host,port))
+    threadRTT = 0
 
     while 1:
         for _ in range( msgMultiple ):
-            #cData = message + str(clientNumber)
-            cData = message
+            cData = message + "  From: Client " + str(clientNumber)
             start = time.time()
             s.send(cData.encode('utf-8'))
             print "Sent: " + cData
             sData = s.recv(buf)
             end =  time.time()
             response_time = end - start
+            threadRTT += end - start
             totalTime += response_time
             print "Received: " + cData + '\n'
             t = random.randint(0, 9)
             time.sleep(t)
+        text_file.write("\nClient " + str(clientNumber) + " RTT time taken for " + str(msgMultiple) + " messages was: " + str(threadRTT) + " seconds.)
+        threadRTT = 0
+        break
 
 if __name__ == '__main__': 
     host = raw_input('Enter the server IP: ')
@@ -98,3 +107,8 @@ if __name__ == '__main__':
     print("Total Data sent was : " + str(totalBytes) + " Bytes." )
     print("Average RTT was : " + str (averageRTT) + " seconds." )
     print("Requests was : " + str (totalRequests))
+
+    text_file.write("\n\n Bytes sent in message was : " + str(bytes))
+    text_file.write("\nTotal Data sent was : " + str(totalBytes) + " Bytes." )
+    text_file.write("\nAverage RTT was : " + str (averageRTT) + " seconds." )
+    text_file.write("\nRequests was : " + str (totalRequests))
