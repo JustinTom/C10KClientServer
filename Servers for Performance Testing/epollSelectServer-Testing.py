@@ -114,7 +114,6 @@ def close(epoll, serversocket,):
     print ("\nClosing the server...")
     serversocket.close()
 
-
 if __name__ == '__main__':
     hostIP = raw_input('Enter your host IP \n')
     port = int(input('What port would you like to use?\n'))
