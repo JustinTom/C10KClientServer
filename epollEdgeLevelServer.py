@@ -82,7 +82,7 @@ def threadFunc():
                 elif event & select.EPOLLHUP:
                     counter-=1
     except KeyboardInterrupt:
-        close()
+        close(epoll, serversocket, counter, dataTotal)
 
 '''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''
 --  FUNCTION
@@ -90,20 +90,27 @@ def threadFunc():
 --  Developer:  Kyle Gilles, Justin Tom
 --  Created On: Feb. 10, 2015
 --  Parameters:
---      none
+--      epoll
+--          Required to pass the variable to the next function
+--      serversocket
+--          Required to pass the variable to the next function
+--      counter
+--          Required to pass the variable to the next function
+--      dataTotal  
+--          Required to pass the variable to the next function
 --  Return Values:
 --      none
 --  Description:
 --    Cleans up and closes the epoll objects, and sockets as well as closing the log text file.
 '''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''  
-def close():
+def close(epoll, serversocket, counter, dataTotal):
     epoll.unregister(serversocket.fileno())
     epoll.close()
-    print ("Closing the server...")
+    print ("\nClosing the server...")
     serversocket.close()
 
-    text_file.write("\n\nTotal number of connections: " + counter)
-    text_file.write("\nTotal amount of data transferred: " + dataTotal)
+    text_file.write("\n\nTotal number of connections: " + str(counter))
+    text_file.write("\nTotal amount of data transferred: " + str(dataTotal))
     text_file.close()
 
 if __name__=="__main__":
