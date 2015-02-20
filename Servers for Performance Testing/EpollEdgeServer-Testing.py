@@ -77,10 +77,10 @@ def run(hostIP, port):
                 elif event & select.EPOLLIN:
                     receiveSock = requests.get(fileno)
                 
-		            try:
+                    try:
                         data = receiveSock.recv(bufferSize)
                         receiveSock.send(data)
-		            except:
+                    except:
                         pass
     except KeyboardInterrupt:
         print ("\nA keyboardInterruption has occured.")
