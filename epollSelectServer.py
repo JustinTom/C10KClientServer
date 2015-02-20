@@ -111,15 +111,15 @@ def run(hostIP, port):
 --  Created On: Feb. 10, 2015
 --  Parameters:
 --      epoll
---          Required to pass the variable to the next function
+--          Epoll object required to close and clean up
 --      serversocket
---          Required to pass the variable to the next function
+--          Server socket object required to close it
 --      counter
---          Required to pass the variable to the next function
+--          Counter for total amount of connections.
 --      dataReceivedTotal
---          Required to pass the variable to the next function
+--          Total number of data bytes received from the client to the server
 --      dataSentTotal
---          Required to pass the variable to the next function
+--          Total number of data bytes sent to the client from server
 --  Return Values:
 --      none
 --  Description:
@@ -135,8 +135,6 @@ def close(epoll, serversocket, counter, dataReceivedTotal, dataSentTotal):
     text_file.write("\nTotal amount of data received: " + str(dataReceivedTotal))
     text_file.write("\nTotal amount of data sent: " + str(dataSentTotal))
     text_file.close()
-
-    return
 
 '''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''
 --  FUNCTION

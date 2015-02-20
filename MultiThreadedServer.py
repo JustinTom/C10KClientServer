@@ -67,14 +67,7 @@ def threadHandler(clientsocket, clientaddr):
 --  Developer:  Kyle Gilles, Justin Tom
 --  Created On: Feb. 10, 2015
 --  Parameters:
---      epoll
---          Required to pass the variable to the next function
---      serversocket
---          Required to pass the variable to the next function
---      counter
---          Required to pass the variable to the next function
---      dataTotal  
---          Required to pass the variable to the next function
+--      none
 --  Return Values:
 --      none
 --  Description:
