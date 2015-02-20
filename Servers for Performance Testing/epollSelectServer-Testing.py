@@ -75,8 +75,7 @@ def run(hostIP, port):
                     clientConnection.setblocking(0)
                     #Register interest in read (EPOLLIN) events for the new socket.
                     epoll.register(clientConnection.fileno(), select.EPOLLIN)
-                    #print (str(clientAddress) + " just connected. \nCurrently connected clients: " + str(counter))
-                    print ("Currently connected clients: " + str(counter))
+                    #print ("Currently connected clients: " + str(counter))
                 elif event & select.EPOLLIN:
                     receiveSock = requests.get(fileno)
                     data = receiveSock.recv(bufferSize)

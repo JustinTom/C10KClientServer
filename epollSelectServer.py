@@ -52,7 +52,6 @@ def run(hostIP, port):
     bufferSize = 1024
     dataTotal = 0
     serversocket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-    #serversocket.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
     serversocket.bind((hostIP, port))
     #The listen backlog queue size
     serversocket.listen(10000)
@@ -64,7 +63,7 @@ def run(hostIP, port):
     epoll.register(serversocket.fileno(), select.EPOLLIN)
     try:
         #The connection dictionary maps file descriptors (integers) to their corresponding network connection objects.
-        connections = {}; requests = {}; responses = {}
+        requests = {}
         while running:
             #Query the epoll object to find out if any events of interest may have occurred. The parameter "1" signifies that we are willing to wait up to one second for such an event to occur. If any events of interest occurred prior to this query, the query will return immediately with a list of those events.
             events = epoll.poll(-1)
@@ -79,8 +78,8 @@ def run(hostIP, port):
                     clientConnection.setblocking(0)
                     #Register interest in read (EPOLLIN) events for the new socket.
                     epoll.register(clientConnection.fileno(), select.EPOLLIN)
-                    text_file.write(str(getTime()) + " - " + clientAddress + " just connected. \nCurrently connected clients: " + str(counter) + '\n')
-                    print (clientAddress + " just connected. \nCurrently connected clients: " + str(counter))
+                    text_file.write(str(getTime()) + " - " + str(clientAddress) + " just connected. \nCurrently connected clients: " + str(counter) + '\n')
+                    print (str(clientAddress) + " just connected. \nCurrently connected clients: " + str(counter))
                 elif event & select.EPOLLIN:
                     receiveSock = requests.get(fileno)
                     data = receiveSock.recv(bufferSize)
