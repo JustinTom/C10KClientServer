@@ -107,7 +107,7 @@ def run(hostIP, port):
 --  Description:
 --    Cleans up and closes the epoll objects, and sockets as well as closing the log text file.
 '''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''  
-def close(epoll, serversocket,):
+def close(epoll, serversocket):
     epoll.unregister(serversocket.fileno())
     epoll.close()
     print ("\nClosing the server...")
