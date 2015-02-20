@@ -19,16 +19,13 @@
 --  The program will read data from the client socket and simply echo it back.
 --  Design is a simple, single-threaded server using non-blocking, edge-triggered
 --  I/O to handle simultaneous inbound connections. 
---  The program will also keep a log file of the number of connections and all data being echoed.
+--  The program is meant purely for testing purposes and will not keep a log file of the number of connections and data
 --  Test with accompanying client application: echoClient.py
 '''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''
 #!/usr/bin/env python
 
 import socket
 import select
-import thread
-import datetime
-import time
 
 '''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''
 --  FUNCTION
@@ -40,15 +37,13 @@ import time
 --          the IP address of the host
 --      port
 --          the port to listen on
---      logFlag
---          Flag to determine wheter or not to keep a log
 --  Return Values:
 --      none
 --  Description:
 --      Listens on the specified socket for incoming data, sets a counter for connected clientSocket
 --      and echoes back the received data.
 '''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''  
-def run(hostIP, port, logFlag):
+def run(hostIP, port):
     running = 1
     counter = 0
     bufferSize = 1024
@@ -66,7 +61,7 @@ def run(hostIP, port, logFlag):
     epoll.register(serversocket.fileno(), select.EPOLLIN)
     try:
         #The connection dictionary maps file descriptors (integers) to their corresponding network connection objects.
-        connections = {}; requests = {}; responses = {}
+        requests = {}
         while running:
             #Query the epoll object to find out if any events of interest may have occurred. The parameter "1" signifies that we are willing to wait up to one second for such an event to occur. If any events of interest occurred prior to this query, the query will return immediately with a list of those events.
             events = epoll.poll(-1)
@@ -81,19 +76,11 @@ def run(hostIP, port, logFlag):
                     clientConnection.setblocking(0)
                     #Register interest in read (EPOLLIN) events for the new socket.
                     epoll.register(clientConnection.fileno(), select.EPOLLIN)
-                    if logFlag == 1:
-                        text_file.write(str(getTime()) + " - " + clientAddress + " just connected. \nCurrently connected clients: " + str(counter) + '\n')
-                    print (str(clientAddress) + " just connected. \nCurrently connected clients: " + str(counter))
+                    #print (str(clientAddress) + " just connected. \nCurrently connected clients: " + str(counter))
+                    print ("Currently connected clients: " + str(counter))
                 elif event & select.EPOLLIN:
                     receiveSock = requests.get(fileno)
                     data = receiveSock.recv(bufferSize)
-                    clientIP, clientSocket = receiveSock.getpeername()
-                    #print 'Currently connected clients: ' + str(counter)
-                    dataSize = len(data)
-                    dataTotal += dataSize
-                    if logFlag == 1:
-                        text_file.write(str(getTime()) + " - Size of data received (" + clientIP + ":" + str(clientSocket) + ") = " + str(dataSize) + '\n')
-                    #print 'Data(' + clientIP + ':' + str(clientSocket) + ') = ' + data + '\n'
                     receiveSock.send(data)
                 elif event & select.EPOLLERR:
                     counter-=1
@@ -101,12 +88,12 @@ def run(hostIP, port, logFlag):
                     counter-=1
     #Handle keyboard interrupts (Mainly ctrl+c)
     except KeyboardInterrupt:
-        close(epoll, serversocket, counter, dataTotal)
+        close(epoll, serversocket)
     #Handle all other exceptions in hopes to close 'cleanly'
     except Exception,e:
         print ("Server connection has ran into an unexpected error: "),
         print (e)
-        close(epoll, serversocket, counter, dataTotal) 
+        close(epoll, serversocket) 
 
 '''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''
 --  FUNCTION
@@ -118,25 +105,16 @@ def run(hostIP, port, logFlag):
 --          Required to pass the variable to the next function
 --      serversocket
 --          Required to pass the variable to the next function
---      counter
---          Required to pass the variable to the next function
---      dataTotal  
---          Required to pass the variable to the next function
 --  Return Values:
 --      none
 --  Description:
 --    Cleans up and closes the epoll objects, and sockets as well as closing the log text file.
 '''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''  
-def close(epoll, serversocket, counter, dataTotal):
+def close(epoll, serversocket,):
     epoll.unregister(serversocket.fileno())
     epoll.close()
     print ("\nClosing the server...")
     serversocket.close()
-
-    if logFlag == 1:
-        text_file.write("\n\nTotal number of connections: " + str(counter))
-        text_file.write("\nTotal amount of data transferred: " + str(dataTotal))
-        text_file.close()
 
     return
 
@@ -153,24 +131,9 @@ def close(epoll, serversocket, counter, dataTotal):
 --  Description:
 --    Returns the current time of when the function was called in a Y-M-D H:M:S format
 '''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''  
-def getTime():
-    ts = time.time()
-    timeStamp = datetime.datetime.fromtimestamp(ts).strftime('%Y-%m-%d_%H:%M:%S')
-    return timeStamp
 
 if __name__ == '__main__':
     hostIP = raw_input('Enter your host IP \n')
     port = int(input('What port would you like to use?\n'))
-    log = raw_input('Would you like to keep a log of the server connections? (y/n)\n')
 
-    #Flag for the logging
-    if log == 'y':
-        logFlag = 1
-    else:
-        logFlag = 0
-
-    if logFlag == 1:
-        #Create and initialize the text file with the date in the filename in the logfiles directory
-        text_file = open("./Logfiles/" + str(getTime()) + "_SelectServerLog.txt", "w")
-
-    run(hostIP, port, logFlag)
+    run(hostIP, port)
