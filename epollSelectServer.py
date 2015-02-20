@@ -40,15 +40,13 @@ import time
 --          the IP address of the host
 --      port
 --          the port to listen on
---      logFlag
---          Flag to determine wheter or not to keep a log
 --  Return Values:
 --      none
 --  Description:
 --      Listens on the specified socket for incoming data, sets a counter for connected clientSocket
 --      and echoes back the received data.
 '''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''  
-def run(hostIP, port, logFlag):
+def run(hostIP, port):
     running = 1
     counter = 0
     bufferSize = 1024
@@ -81,9 +79,8 @@ def run(hostIP, port, logFlag):
                     clientConnection.setblocking(0)
                     #Register interest in read (EPOLLIN) events for the new socket.
                     epoll.register(clientConnection.fileno(), select.EPOLLIN)
-                    if logFlag == 1:
-                        text_file.write(str(getTime()) + " - " + clientAddress + " just connected. \nCurrently connected clients: " + str(counter) + '\n')
-                    print (str(clientAddress) + " just connected. \nCurrently connected clients: " + str(counter))
+                    text_file.write(str(getTime()) + " - " + clientAddress + " just connected. \nCurrently connected clients: " + str(counter) + '\n')
+                    print (clientAddress + " just connected. \nCurrently connected clients: " + str(counter))
                 elif event & select.EPOLLIN:
                     receiveSock = requests.get(fileno)
                     data = receiveSock.recv(bufferSize)
@@ -91,8 +88,7 @@ def run(hostIP, port, logFlag):
                     #print 'Currently connected clients: ' + str(counter)
                     dataSize = len(data)
                     dataTotal += dataSize
-                    if logFlag == 1:
-                        text_file.write(str(getTime()) + " - Size of data received (" + clientIP + ":" + str(clientSocket) + ") = " + str(dataSize) + '\n')
+                    text_file.write(str(getTime()) + " - Size of data received (" + clientIP + ":" + str(clientSocket) + ") = " + str(dataSize) + '\n')
                     #print 'Data(' + clientIP + ':' + str(clientSocket) + ') = ' + data + '\n'
                     receiveSock.send(data)
                 elif event & select.EPOLLERR:
@@ -104,8 +100,7 @@ def run(hostIP, port, logFlag):
         close(epoll, serversocket, counter, dataTotal)
     #Handle all other exceptions in hopes to close 'cleanly'
     except Exception,e:
-        print ("Server connection has ran into an unexpected error: "),
-        print (e)
+        print ("Server connection has ran into an unexpected error: " + e)
         close(epoll, serversocket, counter, dataTotal) 
 
 '''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''
@@ -133,10 +128,9 @@ def close(epoll, serversocket, counter, dataTotal):
     print ("\nClosing the server...")
     serversocket.close()
 
-    if logFlag == 1:
-        text_file.write("\n\nTotal number of connections: " + str(counter))
-        text_file.write("\nTotal amount of data transferred: " + str(dataTotal))
-        text_file.close()
+    text_file.write("\n\nTotal number of connections: " + str(counter))
+    text_file.write("\nTotal amount of data transferred: " + str(dataTotal))
+    text_file.close()
 
     return
 
@@ -161,16 +155,8 @@ def getTime():
 if __name__ == '__main__':
     hostIP = raw_input('Enter your host IP \n')
     port = int(input('What port would you like to use?\n'))
-    log = raw_input('Would you like to keep a log of the server connections? (y/n)\n')
 
-    #Flag for the logging
-    if log == 'y':
-        logFlag = 1
-    else:
-        logFlag = 0
+    #Create and initialize the text file with the date in the filename in the logfiles directory
+    text_file = open("./Logfiles/" + str(getTime()) + "_SelectServerLog.txt", "w")
 
-    if logFlag == 1:
-        #Create and initialize the text file with the date in the filename in the logfiles directory
-        text_file = open("./Logfiles/" + str(getTime()) + "_SelectServerLog.txt", "w")
-
-    run(hostIP, port, logFlag)
+    run(hostIP, port)
