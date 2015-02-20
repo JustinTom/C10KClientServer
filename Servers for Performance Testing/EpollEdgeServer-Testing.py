@@ -26,6 +26,24 @@ import socket
 import select
 import thread
 
+
+'''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''
+--  FUNCTION
+--  Name:       run
+--  Developer:  Kyle Gilles, Justin Tom
+--  Created On: Feb. 10, 2015
+--  Parameters:
+--      hostIP
+--          the IP address of the host
+--      port
+--          the port to listen on
+--  Return Values:
+--      none
+--  Description:
+--      Listens on the specified socket for incoming data, sets a counter for connected clientSocket
+--      and echoes back the received data.
+'''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''  
+
 def run(hostIP, port):
     running = 1
     bufferSize = 1024
@@ -59,12 +77,31 @@ def run(hostIP, port):
                 elif event & select.EPOLLIN:
                     receiveSock = requests.get(fileno)
                 
-		    try:
+		            try:
                         data = receiveSock.recv(bufferSize)
                         receiveSock.send(data)
-		    except:
+		            except:
                         pass
-            
+    except KeyboardInterrupt:
+        print ("\nA keyboardInterruption has occured.")
+        close(epoll, serversocket, counter, dataTotal)
+    
+    except Exception,e:
+        print ("Unknown Error has occured." + str(e))
+        close(epoll, serversocket, counter, dataTotal)
+
+'''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''
+--  FUNCTION
+--  Name:       close
+--  Developer:  Kyle Gilles, Justin Tom
+--  Created On: Feb. 10, 2015
+--  Parameters:
+--      none
+--  Return Values:
+--      none
+--  Description:
+--    Cleans up and closes the epoll objects, and sockets as well as closing the log text file.
+'''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''        
                 
 def close(epoll, serversocket):
     epoll.unregister(serversocket.fileno())

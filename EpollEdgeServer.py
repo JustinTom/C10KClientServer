@@ -87,7 +87,7 @@ def run(hostIP, port):
                         dataTotal += dataSize
                         #text_file.write(str(timeStamp) + " - Size of data received (" + clientIP + ":" + str(clientSocket) + ") = " + str(dataSize) + '\n')
                         receiveSock.send(data)
-		    except:
+                    except:
                         pass
 
 
