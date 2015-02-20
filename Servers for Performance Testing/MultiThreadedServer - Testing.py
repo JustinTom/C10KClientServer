@@ -25,9 +25,6 @@
 #!/usr/bin/env python
 import socket
 import threading
-import thread
-import time
-import datetime
 import sys
 
 '''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''
@@ -45,16 +42,10 @@ import sys
 --  Description:
 --    When a client establishes a connection a thread is created and this is its loop.
 '''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''  
-
 def threadHandler(clientsocket, clientaddr):
     global dataTotal
     while 1:
-        
         data = clientsocket.recv(bufferSize)
-        clientIP, clientSocket = clientsocket.getpeername()
-        dataSize = len(data)
-        dataTotal += dataSize
-        text_file.write(str(getTime()) + " - Size of data received (" + clientIP + ":" + str(clientSocket) + ") = " + str(dataSize) + '\n')
         clientsocket.send(data)
         
 '''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''
@@ -78,28 +69,7 @@ def threadHandler(clientsocket, clientaddr):
 '''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''  
 def close():
     print ("Closing the server...")
-    text_file.write("\n\nTotal number of connections: " + str(counter))
-    text_file.write("\nTotal amount of data transferred: " + str(dataTotal))
-    text_file.close()
     sys.exit()
-          
-'''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''
---  FUNCTION
---  Name:       getTime
---  Developer:  Justin Tom
---  Created On: Feb. 18, 2015
---  Parameters:
---      none
---  Return Values:
---      timeStamp
---          The current time of when the function was called
---  Description:
---    Returns the current time of when the function was called in a Y-M-D H:M:S format
-'''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''  
-def getTime():
-    ts = time.time()
-    timeStamp = datetime.datetime.fromtimestamp(ts).strftime('%Y-%m-%d_%H:%M:%S')
-    return timeStamp
 
 
 if __name__ == '__main__':
@@ -107,33 +77,24 @@ if __name__ == '__main__':
     port = int(input('What port would you like to use?\n'))
     connections = []
     counter = 0
-    dataTotal = 0
     bufferSize = 1024
-    
-    #Create and initialize the text file with the date in the filename in the logfiles directory   
-    text_file = open("./Logfiles/" + str(getTime()) + "_MultiThreadedServerLog.txt", "w")
 
     addr = (hostIP, port)
     serversocket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
     serversocket.bind(addr)
     serversocket.listen(50)
-    print ("Server is listening for connections\n")
-
     
     try: 
         while 1: 
             clientsocket, clientaddr = serversocket.accept()
             counter += 1
-            print (str(clientaddr) + " : " + " Just Connected. \n Currently connected clients: " + str(counter) + "\n")
-            text_file.write(str(getTime()) + " - " str(clientaddr) + " : " + " Just Connected. \n Currently connected clients: " + str(counter) + "\n")
+            print ("Currently connected clients: " + str(counter) + "\n")
             clientThread = threading.Thread(target = threadHandler, args=(clientsocket, clientaddr))
             clientThread.start()
     
     except KeyboardInterrupt:
         print ("A keyboardInterruption has occured.")
-        close()
-        
-        
+        close()       
     
     except Exception,e:
         print ("Unknown Error has occured." + str(e))
