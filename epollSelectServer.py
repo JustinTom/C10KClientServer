@@ -152,6 +152,6 @@ if __name__ == '__main__':
     port = int(input('What port would you like to use?\n'))
 
     #Create and initialize the text file with the date in the filename in the logfiles directory
-    text_file = open("Logfiles/" + str(getTime()) + "_SelectServerLog.txt", "w")
+    text_file = open("./Logfiles/" + str(getTime()) + "_SelectServerLog.txt", "w")
 
     run(hostIP, port)

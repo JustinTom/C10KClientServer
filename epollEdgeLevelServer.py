@@ -121,7 +121,7 @@ if __name__=="__main__":
     curTime = datetime.now().strftime('%Y-%m-%d_%H.%M.%S')
 
     #Create and initialize the text file with the date in the filename
-    text_file = open("Logfiles/" + curTime + "_EpollServerLog.txt", "w")
+    text_file = open("./Logfiles/" + curTime + "_EpollServerLog.txt", "w")
 
     requests = {}
     running = 1

@@ -39,7 +39,7 @@ message = ""
 msgMultiple = 1
 ts = time.time() 
 curTime = datetime.datetime.fromtimestamp(ts).strftime('%Y-%m-%d_%H.%M.%S')
-text_file = open("Logfiles/" + curTime +"_ClientLog.txt", "w")
+text_file = open("./Logfiles/" + curTime +"_ClientLog.txt", "w")
 
 '''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''
 --  FUNCTION
