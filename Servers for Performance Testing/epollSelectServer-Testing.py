@@ -114,20 +114,6 @@ def close(epoll, serversocket,):
     print ("\nClosing the server...")
     serversocket.close()
 
-'''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''
---  FUNCTION
---  Name:       getTime
---  Developer:  Justin Tom
---  Created On: Feb. 18, 2015
---  Parameters:
---      none
---  Return Values:
---      timeStamp
---          The current time of when the function was called
---  Description:
---    Returns the current time of when the function was called in a Y-M-D H:M:S format
-'''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''  
-
 if __name__ == '__main__':
     hostIP = raw_input('Enter your host IP \n')
     port = int(input('What port would you like to use?\n'))
