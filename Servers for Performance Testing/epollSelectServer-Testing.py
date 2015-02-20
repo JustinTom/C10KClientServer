@@ -49,7 +49,6 @@ def run(hostIP, port):
     bufferSize = 1024
     dataTotal = 0
     serversocket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-    #serversocket.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
     serversocket.bind((hostIP, port))
     #The listen backlog queue size
     serversocket.listen(10000)
@@ -114,8 +113,6 @@ def close(epoll, serversocket,):
     epoll.close()
     print ("\nClosing the server...")
     serversocket.close()
-
-    return
 
 '''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''
 --  FUNCTION
