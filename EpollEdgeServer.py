@@ -46,14 +46,11 @@ import time
 --      and echoes back the received data.
 '''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''  
 def run(hostIP, port):
-
-
     running = 1
-    global serversocket
-    global bufferSize
-    global counter
-    global dataTotal
-    global ts
+    counter = 0
+    bufferSize = 1024
+    dataTotal = 0
+    serversocket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)  
     #serversocket.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
     serversocket.bind((hostIP, port))
     #The listen backlog queue size
@@ -61,9 +58,7 @@ def run(hostIP, port):
     #Since sockets are blocking by default, this is necessary to use non-blocking     (asynchronous) mode.
     serversocket.setblocking(0)
     #serversocket.setsockopt(socket.IPPROTO_TCP, socket.TCP_NODELAY, 1)
-
-    
-    global epoll
+    epoll = select.epoll()
     #Register interest in read events on the server socket. A read event will occur     any time the server socket accepts a socket connection.
     epoll.register(serversocket.fileno(), select.EPOLLIN | select.EPOLLET)
 
@@ -85,8 +80,7 @@ def run(hostIP, port):
                 elif event & select.EPOLLIN:
                     receiveSock = requests.get(fileno)
                     
-                    
-		    try:
+                    try:
                         data = receiveSock.recv(bufferSize)
                         #timeStamp = datetime.datetime.fromtimestamp(ts).strftime('%Y-%m-%d %H:%M:%S')
                         dataSize = len(data)
@@ -99,17 +93,17 @@ def run(hostIP, port):
 
                 elif event & select.EPOLLERR:
                     counter-=1
-                    print 'Currently connected clients: ' + str(counter)
+                    
                 elif event & select.EPOLLHUP:
                     counter-=1
-                    print 'Currently connected clients: ' + str(counter)
+                    
     except KeyboardInterrupt:
-        print ("A keyboardInterruption has occured.")
-        close()
+        print ("\nA keyboardInterruption has occured.")
+        close(epoll, serversocket, counter, dataTotal)
     
     except Exception,e:
         print ("Unknown Error has occured." + str(e))
-        close()
+        close(epoll, serversocket, counter, dataTotal)
 
 '''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''
 --  FUNCTION
@@ -123,31 +117,44 @@ def run(hostIP, port):
 --  Description:
 --    Cleans up and closes the epoll objects, and sockets as well as closing the log text file.
 '''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''  
-def close():
+def close(epoll, serversocket, counter, dataTotal):
  
     epoll.unregister(serversocket.fileno())
     epoll.close()
-    print ("Closing the server...")
+    print ("\nClosing the server...")
     serversocket.close()
     text_file.write("\n\nTotal number of connections: " + str(counter))
     text_file.write("\nTotal amount of data transferred: " + str(dataTotal))
     text_file.close()
     return                
-           
+
+
+'''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''
+--  FUNCTION
+--  Name:       getTime
+--  Developer:  Justin Tom
+--  Created On: Feb. 18, 2015
+--  Parameters:
+--      none
+--  Return Values:
+--      timeStamp
+--          The current time of when the function was called
+--  Description:
+--    Returns the current time of when the function was called in a Y-M-D H:M:S format
+'''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''  
+def getTime():
+    ts = time.time()
+    timeStamp = datetime.datetime.fromtimestamp(ts).strftime('%Y-%m-%d_%H:%M:%S')
+    return timeStamp         
 
 if __name__ == '__main__':
     hostIP = raw_input('Enter your host IP \n')
     port = int(input('What port would you like to use?\n'))
-    
-    epoll = select.epoll()
-    serversocket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-    bufferSize = 1024
-    counter = 0
-    dataTotal = 0
-    ts = time.time()
-    curTime = datetime.datetime.fromtimestamp(ts).strftime('%Y-%m-%d_%H.%M.%S')
+ 
+    text_file = open(str(getTime()) + "_EpollEdgeServerLog.txt", "w")
 
-    text_file = open(curTime + "_EpollServerLog.txt", "w")
+    #Create and initialize the text file with the date in the filename in the logfiles directory
+    #text_file = open("./Logfiles/" + str(getTime()) + "_SelectServerLog.txt", "w")
     
     run(hostIP, port)
                

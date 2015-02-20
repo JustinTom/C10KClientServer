@@ -1,7 +1,7 @@
 '''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''
 --  SOURCE FILE:    echoClient.py - A simple TCP client program.
 --
---  PROGRAM:        Single threaded client
+--  PROGRAM:        Multi threaded client
 --                  python echoClient.py
 --
 --  FUNCTIONS:      run()
@@ -37,9 +37,7 @@ host = ""
 port = 8005
 message = ""
 msgMultiple = 1
-ts = time.time() 
-curTime = datetime.datetime.fromtimestamp(ts).strftime('%Y-%m-%d_%H.%M.%S')
-text_file = open("./Logfiles/" + curTime +"_ClientLog.txt", "w")
+
 
 '''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''
 --  FUNCTION
@@ -80,12 +78,39 @@ def run (clientNumber):
         threadRTT = 0
         break
 
+
+'''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''
+--  FUNCTION
+--  Name:       getTime
+--  Developer:  Justin Tom
+--  Created On: Feb. 18, 2015
+--  Parameters:
+--      none
+--  Return Values:
+--      timeStamp
+--          The current time of when the function was called
+--  Description:
+--    Returns the current time of when the function was called in a Y-M-D H:M:S format
+''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''' 
+def getTime():
+    ts = time.time()
+    timeStamp = datetime.datetime.fromtimestamp(ts).strftime('%Y-%m-%d_%H:%M:%S')
+    return timeStamp     
+
+
+
+
+
+    
 if __name__ == '__main__': 
     host = raw_input('Enter the server IP: ')
     port = int(input('Enter the port: '))
     clients = int(input('Enter number of clients: '))
     message = raw_input('Enter a message to send: ')
     msgMultiple = int(input('Enter the number of times you would like to send the message: '))
+
+    #text_file = open("./Logfiles/" + str(getTime()) + "_ClientLog.txt", "w")
+    text_file = open(str(getTime()) + "_ClientLog.txt", "w")
     
     threads = []
     totalTime = 0

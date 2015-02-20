@@ -29,10 +29,24 @@ import thread
 import time
 import datetime
 import sys
- 
 
+'''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''
+--  FUNCTION
+--  Name:       threadHandler
+--  Developer:  Kyle Gilles
+--  Created On: Feb. 18, 2015
+--  Parameters:
+--      clientsocket
+--          Required to pass the variable to the next function    
+--      clientaddr
+--          Address of the client thread has connection with            
+--  Return Values:
+--     none
+--  Description:
+--    When a client establishes a connection a thread is created and this is its loop.
+'''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''  
 
-def handler(clientsocket, clientaddr):
+def threadHandler(clientsocket, clientaddr):
     global dataTotal
     while 1:
         
@@ -41,7 +55,25 @@ def handler(clientsocket, clientaddr):
         dataTotal += dataSize
         clientsocket.send(data)
         
-
+'''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''
+--  FUNCTION
+--  Name:       close
+--  Developer:  Kyle Gilles, Justin Tom
+--  Created On: Feb. 10, 2015
+--  Parameters:
+--      epoll
+--          Required to pass the variable to the next function
+--      serversocket
+--          Required to pass the variable to the next function
+--      counter
+--          Required to pass the variable to the next function
+--      dataTotal  
+--          Required to pass the variable to the next function
+--  Return Values:
+--      none
+--  Description:
+--    Cleans up and closes the epoll objects, and sockets as well as closing the log text file.
+'''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''  
 def close():
     print ("Closing the server...")
     text_file.write("\n\nTotal number of connections: " + str(counter))
@@ -49,6 +81,23 @@ def close():
     text_file.close()
     sys.exit()
           
+'''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''
+--  FUNCTION
+--  Name:       getTime
+--  Developer:  Justin Tom
+--  Created On: Feb. 18, 2015
+--  Parameters:
+--      none
+--  Return Values:
+--      timeStamp
+--          The current time of when the function was called
+--  Description:
+--    Returns the current time of when the function was called in a Y-M-D H:M:S format
+'''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''  
+def getTime():
+    ts = time.time()
+    timeStamp = datetime.datetime.fromtimestamp(ts).strftime('%Y-%m-%d_%H:%M:%S')
+    return timeStamp
 
 
 if __name__ == '__main__':
@@ -58,26 +107,21 @@ if __name__ == '__main__':
     counter = 0
     dataTotal = 0
     bufferSize = 1024
-    #dataTotal = 0
     ts = time.time()
-    con = 0
     
-    curTime = datetime.datetime.fromtimestamp(ts).strftime('%Y-%m-%d_%H.%M.%S')
+    
+    text_file = open(str(getTime()) + "_MultiThreadedServerLog.txt", "w")
+    #Create and initialize the text file with the date in the filename in the logfiles directory
+    #text_file = open("./Logfiles/" + str(getTime()) + "_SelectServerLog.txt", "w")
 
-    text_file = open(curTime + "_ThreadedServerLog.txt", "w")
-    
     addr = (hostIP, port)
     serversocket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-
-
-    
-
-
-    
-
     serversocket.bind(addr)
     serversocket.listen(50)
     print ("Server is listening for connections\n")
+
+
+
 
     
     try: 
@@ -86,7 +130,7 @@ if __name__ == '__main__':
             counter += 1
             print (str(clientaddr) + " : " + " Just Connected. \n Currently connected clients: " + str(counter) + "\n")
             text_file.write(str(clientaddr) + " : " + " Just Connected. \n Currently connected clients: " + str(counter) + "\n")
-            clientThread = threading.Thread(target = handler, args=(clientsocket, clientaddr))
+            clientThread = threading.Thread(target = threadHandler, args=(clientsocket, clientaddr))
             clientThread.start()
     
     except KeyboardInterrupt:

@@ -98,9 +98,10 @@ def run(hostIP, port):
     #Handle keyboard interrupts (Mainly ctrl+c)
     except KeyboardInterrupt:
         close(epoll, serversocket, counter, dataTotal)
+        print ("\nA keyboardInterruption has occured.")
     #Handle all other exceptions in hopes to close 'cleanly'
     except Exception,e:
-        print ("Server connection has ran into an unexpected error: " + e)
+        print ("Server connection has ran into an unexpected error: " + str(e))
         close(epoll, serversocket, counter, dataTotal) 
 
 '''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''
