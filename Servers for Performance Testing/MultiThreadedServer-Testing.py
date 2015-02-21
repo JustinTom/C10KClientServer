@@ -58,10 +58,6 @@ def threadHandler(clientsocket, clientaddr):
 --          Required to pass the variable to the next function
 --      serversocket
 --          Required to pass the variable to the next function
---      counter
---          Required to pass the variable to the next function
---      dataTotal  
---          Required to pass the variable to the next function
 --  Return Values:
 --      none
 --  Description:
@@ -76,7 +72,6 @@ if __name__ == '__main__':
     hostIP = raw_input('Enter your host IP \n')
     port = int(input('What port would you like to use?\n'))
     connections = []
-    counter = 0
     bufferSize = 1024
 
     addr = (hostIP, port)
@@ -87,8 +82,6 @@ if __name__ == '__main__':
     try: 
         while 1: 
             clientsocket, clientaddr = serversocket.accept()
-            counter += 1
-            print ("Currently connected clients: " + str(counter) + "\n")
             clientThread = threading.Thread(target = threadHandler, args=(clientsocket, clientaddr))
             clientThread.start()
     
