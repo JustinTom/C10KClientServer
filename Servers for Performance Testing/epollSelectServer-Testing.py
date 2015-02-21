@@ -45,13 +45,12 @@ import select
 '''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''  
 def run(hostIP, port):
     running = 1
-    counter = 0
+    #counter = 0
     bufferSize = 1024
-    dataTotal = 0
     serversocket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
     serversocket.bind((hostIP, port))
     #The listen backlog queue size
-    serversocket.listen(10000)
+    serversocket.listen(socket.SOMAXCONN)
     #Since sockets are blocking by default, this is necessary to use non-blocking (asynchronous) mode.
     serversocket.setblocking(0)
     #Create an epoll object.
@@ -69,20 +68,21 @@ def run(hostIP, port):
                 #If a read event occurred on the socket server, then a new socket connection may have been created.
                 if fileno == serversocket.fileno():
                     clientConnection, clientAddress = serversocket.accept()
-                    counter+=1
+                    #counter+=1
                     requests.update({clientConnection.fileno(): clientConnection})
                     #Set new socket to non-blocking mode.
                     clientConnection.setblocking(0)
                     #Register interest in read (EPOLLIN) events for the new socket.
                     epoll.register(clientConnection.fileno(), select.EPOLLIN)
+                    #print ("%s just connected. \nCurrently connected clients: %d\n") % (clientAddress, counter)
                 elif event & select.EPOLLIN:
                     receiveSock = requests.get(fileno)
                     data = receiveSock.recv(bufferSize)
                     receiveSock.send(data)
                 elif event & select.EPOLLERR:
-                    counter-=1
+                    #counter-=1
                 elif event & select.EPOLLHUP:
-                    counter-=1
+                    #counter-=1
     #Handle keyboard interrupts (Mainly ctrl+c)
     except KeyboardInterrupt:
         close(epoll, serversocket)

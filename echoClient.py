@@ -109,8 +109,7 @@ if __name__ == '__main__':
     message = raw_input('Enter a message to send: ')
     msgMultiple = int(input('Enter the number of times you would like to send the message: '))
 
-    #text_file = open("./Logfiles/" + str(getTime()) + "_ClientLog.txt", "w")
-    text_file = open(str(getTime()) + "_ClientLog.txt", "w")
+    text_file = open("./Logfiles/" + str(getTime()) + "_ClientLog.txt", "w")
     
     threads = []
     totalTime = 0

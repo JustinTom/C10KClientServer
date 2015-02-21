@@ -29,6 +29,7 @@ import select
 import thread
 import datetime
 import time
+import logging
 
 '''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''
 --  FUNCTION
@@ -50,11 +51,14 @@ def run(hostIP, port):
     running = 1
     counter = 0
     bufferSize = 1024
-    dataTotal = 0
+    dataSentTotal = 0
+    dataReceivedTotal = 0
+    dataSSize = 0
+    dataRSize = 0
     serversocket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
     serversocket.bind((hostIP, port))
     #The listen backlog queue size
-    serversocket.listen(10000)
+    serversocket.listen(socket.SOMAXCONN)
     #Since sockets are blocking by default, this is necessary to use non-blocking (asynchronous) mode.
     serversocket.setblocking(0)
     #Create an epoll object.
@@ -78,7 +82,8 @@ def run(hostIP, port):
                     clientConnection.setblocking(0)
                     #Register interest in read (EPOLLIN) events for the new socket.
                     epoll.register(clientConnection.fileno(), select.EPOLLIN)
-                    text_file.write(str(getTime()) + " - " + str(clientAddress) + " just connected. \nCurrently connected clients: " + str(counter) + '\n')
+                    logging.info(str(clientAddress) + " just connected.")
+                    logging.info("Currently connected clients: " + str(counter))
                     print (str(clientAddress) + " just connected. \nCurrently connected clients: " + str(counter))
                 elif event & select.EPOLLIN:
                     receiveSock = requests.get(fileno)
@@ -86,11 +91,11 @@ def run(hostIP, port):
                     clientIP, clientSocket = receiveSock.getpeername()
                     dataRSize = len(data)
                     dataReceivedTotal += dataRSize
-                    text_file.write(str(getTime()) + " - Size of data received (" + clientIP + ":" + str(clientSocket) + ") = " + str(dataRSize) + '\n')
-                    clientsocket.send(data)
+                    logging.info("Size of data received (" + clientIP + ":" + str(clientSocket) + ") = " + str(dataRSize))
                     dataSSize = len(data)
                     dataSentTotal += dataSSize
-                    text_file.write(str(getTime()) + " - Size of data sent (" + clientIP + ":" + str(clientSocket) + ") = " + str(dataSSize) + '\n')
+                    receiveSock.send(data)
+                    logging.info("Size of data sent (" + clientIP + ":" + str(clientSocket) + ") = " + str(dataSSize))
                 elif event & select.EPOLLERR:
                     counter-=1
                 elif event & select.EPOLLHUP:
@@ -131,10 +136,9 @@ def close(epoll, serversocket, counter, dataReceivedTotal, dataSentTotal):
     print ("\nClosing the server...")
     serversocket.close()
 
-    text_file.write("\n\nTotal number of connections: " + str(counter))
-    text_file.write("\nTotal amount of data received: " + str(dataReceivedTotal))
-    text_file.write("\nTotal amount of data sent: " + str(dataSentTotal))
-    text_file.close()
+    logging.info("\n\nTotal number of connections: " + str(counter))
+    logging.info("Total amount of data received: " + str(dataReceivedTotal))
+    logging.info("Total amount of data sent: " + str(dataSentTotal))
 
 '''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''
 --  FUNCTION
@@ -158,7 +162,10 @@ if __name__ == '__main__':
     hostIP = raw_input('Enter your host IP \n')
     port = int(input('What port would you like to use?\n'))
 
-    #Create and initialize the text file with the date in the filename in the logfiles directory
-    text_file = open("./Logfiles/" + str(getTime()) + "_SelectServerLog.txt", "w")
+    logging.basicConfig(filename='./Logfiles/' + str(getTime()) + '_SelectServerLog.txt', 
+                        filemode='w', 
+                        level=logging.INFO, 
+                        format='%(asctime)s - %(message)s', 
+                        datefmt='%H:%M:%S')
 
     run(hostIP, port)
