@@ -48,47 +48,53 @@ def run(hostIP, port):
     running = 1
     bufferSize = 1024
     counter = 0
-    serversocket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-    serversocket.bind((hostIP, port))
-    #The listen backlog queue size
-    serversocket.listen(0)
-    #Since sockets are blocking by default, this is necessary to use non-blocking (asynchronous) mode.
-    serversocket.setblocking(0)
-    #Create an epoll object.
     epoll = select.epoll()
+    requests = {};
+    serversocket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
     #Register interest in read events on the server socket. A read event will occur any time the server socket accepts a socket connection.
     epoll.register(serversocket.fileno(), select.EPOLLIN | select.EPOLLET)
+    requests.update({serversocket.fileno(): serversocket})
+    serversocket.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
+    serversocket.bind((hostIP, port))
+    #The listen backlog queue size
+    serversocket.listen(10000)
+    #Since sockets are blocking by default, this is necessary to use non-blocking (asynchronous) mode.
+    serversocket.setblocking(0)
 
+    
+    
     try:
         #The connection dictionary maps file descriptors (integers) to their corresponding network connection objects.
-        requests = {};
+        
         while running:
             events = epoll.poll(-1)
             for fileno, event in events:
                 if fileno == serversocket.fileno():
                     clientConnection, clientAddress = serversocket.accept()
-                    counter+=1
+                    
                     clientConnection.setblocking(0)
                     requests.update({clientConnection.fileno(): clientConnection})
                     epoll.register(clientConnection.fileno(), select.EPOLLIN | select.EPOLLET)
-                    print 'Currently connected clients: ' + str(counter)
+                    
 
 
                 elif event & select.EPOLLIN:
-                    receiveSock = requests.get(fileno)
+                    clientConnection = requests.get(fileno)
                 
                     try:
-                        data = receiveSock.recv(bufferSize)
-                        receiveSock.send(data)
+                        data = clientConnection.recv(bufferSize)
+                        clientConnection.send(data)
 		    except:
                         pass
+
+
     except KeyboardInterrupt:
         print ("\nA keyboardInterruption has occured.")
         close(epoll, serversocket)
     
-    except Exception,e:
-        print ("Unknown Error has occured." + str(e))
-        close(epoll, serversocket)
+    #except Exception,e:
+        #print ("Unknown Error has occured." + str(e))
+        #close(epoll, serversocket)
 
 '''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''
 --  FUNCTION
