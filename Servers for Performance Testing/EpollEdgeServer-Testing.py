@@ -61,7 +61,7 @@ def run(hostIP, port):
 
     try:
         #The connection dictionary maps file descriptors (integers) to their corresponding network connection objects.
-        connections = {}; requests = {}; responses = {}
+        requests = {};
         while running:
             events = epoll.poll(-1)
             for fileno, event in events:
