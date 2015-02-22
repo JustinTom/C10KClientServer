@@ -1,8 +1,8 @@
 '''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''
---  SOURCE FILE:    MultiThreadedServer.py - A simple echo server using the edge triggered interface of the epoll API
+--  SOURCE FILE:    MultiThreadedServer.py - A simple echo server using multiple threads to handle client connections
 --
---  PROGRAM:        Select method server using epoll edge-triggered
---                  python epollSelectServer.py
+--  PROGRAM:        Multi threaded method server
+--                  python MultiThreadedServer.py
 --
 --  FUNCTIONS:      run(hostIP, port), close()
 --
@@ -17,8 +17,7 @@
 --  NOTES:
 --  The program will accept TCP connections from client machines.
 --  The program will read data from the client socket and simply echo it back.
---  Design is a simple, single-threaded server using non-blocking, edge-triggered
---  I/O to handle simultaneous inbound connections. 
+--  Design is a simple, multi-threaded server I/O to handle simultaneous inbound connections. 
 --  The program will also keep a log file of the number of connections and all data being echoed.
 --  Test with accompanying client application: echoClient.py
 '''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''

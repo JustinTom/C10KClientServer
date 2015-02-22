@@ -1,5 +1,5 @@
 '''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''
---  SOURCE FILE:    epollSelectServer.py - A simple echo server using the edge triggered interface of the epoll API
+--  SOURCE FILE:    epollSelectServer.py - A simple echo server using the level triggered interface of the epoll API
 --
 --  PROGRAM:        Select method server using epoll
 --                  python epollSelectServer.py
@@ -17,7 +17,7 @@
 --  NOTES:
 --  The program will accept TCP connections from client machines.
 --  The program will read data from the client socket and simply echo it back.
---  Design is a simple, single-threaded server using non-blocking, edge-triggered
+--  Design is a simple, single-threaded server using non-blocking, level-triggered
 --  I/O to handle simultaneous inbound connections. 
 --  The program will also keep a log file of the number of connections and all data being echoed.
 --  Test with accompanying client application: echoClient.py
