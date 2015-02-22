@@ -123,7 +123,16 @@ def run(hostIP, port):
 --  Developer:  Kyle Gilles, Justin Tom
 --  Created On: Feb. 10, 2015
 --  Parameters:
---      none
+--      epoll
+--          Epoll object required to close and clean up
+--      serversocket
+--          Server socket object required to close it
+--      counter
+--          Counter for total amount of connections.
+--      dataReceivedTotal
+--          Total number of data bytes received from the client to the server
+--      dataSentTotal
+--          Total number of data bytes sent to the client from server
 --  Return Values:
 --      none
 --  Description:
