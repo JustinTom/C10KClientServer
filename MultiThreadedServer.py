@@ -49,12 +49,16 @@ def threadHandler(clientsocket, clientaddr):
     global dataReceivedTotal
     global dataSentTotal
     while 1:
-        
+        #Receive data from client
         data = clientsocket.recv(bufferSize)
+        #Get client IP and port
         clientIP, clientSocket = clientsocket.getpeername()
+        #Add to total amount of data transfered
         dataRSize = len(data)
         dataReceivedTotal += dataRSize
+        #Log data being sent
         text_file.write(str(getTime()) + " - Size of data received (" + clientIP + ":" + str(clientSocket) + ") = " + str(dataRSize) + '\n')
+        #Send data
         clientsocket.send(data)
         dataSSize = len(data)
         dataSentTotal += dataSSize
@@ -102,25 +106,29 @@ def getTime():
 if __name__ == '__main__':
     hostIP = raw_input('Enter your host IP \n')
     port = int(input('What port would you like to use?\n'))
+    #Maintain how many connections
     connections = []
     counter = 0
+    #Maintain amount of data sent to and from server
     dataTotal = 0
     bufferSize = 1024
-    
     #Create and initialize the text file with the date in the filename in the logfiles directory   
     text_file = open("./Logfiles/" + str(getTime()) + "_MultiThreadedServerLog.txt", "w")
-
     addr = (hostIP, port)
     serversocket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+    #Bind server to port
     serversocket.bind(addr)
+    #The listen backlog queue size
     serversocket.listen(50)
     print ("Server is listening for connections\n")
 
     
     try: 
         while 1: 
+            #Accept client connections, increment number of connections
             clientsocket, clientaddr = serversocket.accept()
             counter += 1
+            #Log client information
             print (str(clientaddr) + " : " + " Just Connected. \n Currently connected clients: " + str(counter) + "\n")
             text_file.write(str(getTime()) + " - " str(clientaddr) + " : " + " Just Connected. \n Currently connected clients: " + str(counter) + "\n")
             clientThread = threading.Thread(target = threadHandler, args=(clientsocket, clientaddr))

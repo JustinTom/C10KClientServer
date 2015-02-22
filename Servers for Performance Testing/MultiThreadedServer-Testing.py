@@ -19,7 +19,7 @@
 --  The program will read data from the client socket and simply echo it back.
 --  Design is a simple, single-threaded server using non-blocking, edge-triggered
 --  I/O to handle simultaneous inbound connections. 
---  The program will also keep a log file of the number of connections and all data being echoed.
+--  The program is built for performance and does not log or output anything.
 --  Test with accompanying client application: echoClient.py
 '''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''
 #!/usr/bin/env python
@@ -71,17 +71,21 @@ def close():
 if __name__ == '__main__':
     hostIP = raw_input('Enter your host IP \n')
     port = int(input('What port would you like to use?\n'))
+    #Maintain how many connections
     connections = []
     bufferSize = 1024
-
     addr = (hostIP, port)
     serversocket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+    #Bind server to port
     serversocket.bind(addr)
+    #The listen backlog queue size
     serversocket.listen(50)
     
     try: 
         while 1: 
+            #Accept client connections
             clientsocket, clientaddr = serversocket.accept()
+            #Create a thread for each client connection
             clientThread = threading.Thread(target = threadHandler, args=(clientsocket, clientaddr))
             clientThread.start()
     

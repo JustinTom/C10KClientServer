@@ -55,6 +55,7 @@ def run(hostIP, port):
     serversocket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
     #Register interest in read events on the server socket. A read event will occur any time the server socket accepts a socket connection.
     epoll.register(serversocket.fileno(), select.EPOLLIN | select.EPOLLET)
+    #Add server filno to array
     requests.update({serversocket.fileno(): serversocket})
     #This method allows a bind() to occur even if a program was recently bound to the port.
     serversocket.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)

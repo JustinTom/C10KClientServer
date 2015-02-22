@@ -51,6 +51,7 @@ def run(hostIP, port):
     running = 1
     counter = 0
     bufferSize = 1024
+    #Maintain amount of data sent to and from server
     dataTotal = 0
     #Create an epoll object
     epoll = select.epoll()
@@ -60,6 +61,7 @@ def run(hostIP, port):
     #Register interest in read events on the server socket. A read event will occur any time the server socket accepts a socket connection.
     epoll.register(serversocket.fileno(), select.EPOLLIN | select.EPOLLET)
     requests.update({serversocket.fileno(): serversocket})
+    #This method allows a bind() to occur even if a program was recently bound to the port.
     serversocket.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
     serversocket.bind((hostIP, port))
     #The listen backlog queue size
