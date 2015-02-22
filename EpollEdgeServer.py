@@ -21,6 +21,8 @@
 --  I/O to handle simultaneous inbound connections. 
 --  The program will also keep a log file of the number of connections and all data being echoed.
 --  Test with accompanying client application: echoClient.py
+--  This Test also maintains a list of the clients connected, as well as how much data is being transferred to and from the client.
+--  All of this data is also logged. 
 '''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''
 #!/usr/bin/env python
 import socket
@@ -50,43 +52,51 @@ def run(hostIP, port):
     counter = 0
     bufferSize = 1024
     dataTotal = 0
+    #Create an epoll object
+    epoll = select.epoll()
+    #The connection dictionary maps file descriptors (integers) to their corresponding network connection objects.
+    requests = {}
     serversocket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)  
-    #serversocket.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
+    #Register interest in read events on the server socket. A read event will occur any time the server socket accepts a socket connection.
+    epoll.register(serversocket.fileno(), select.EPOLLIN | select.EPOLLET)
+    requests.update({serversocket.fileno(): serversocket})
+    serversocket.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
     serversocket.bind((hostIP, port))
     #The listen backlog queue size
-    serversocket.listen(0)
-    #Since sockets are blocking by default, this is necessary to use non-blocking     (asynchronous) mode.
+    serversocket.listen(10000)
+    #Since sockets are blocking by default, this is necessary to use non-blocking (asynchronous) mode.
     serversocket.setblocking(0)
-    #serversocket.setsockopt(socket.IPPROTO_TCP, socket.TCP_NODELAY, 1)
-    epoll = select.epoll()
-    #Register interest in read events on the server socket. A read event will occur     any time the server socket accepts a socket connection.
-    epoll.register(serversocket.fileno(), select.EPOLLIN | select.EPOLLET)
-
+    
     try:
-        #The connection dictionary maps file descriptors (integers) to their     corresponding network connection objects.
-        connections = {}; requests = {}; responses = {}
+       
         while running:
             events = epoll.poll(-1)
             for fileno, event in events:
+                # If a socket connection has been created
                 if fileno == serversocket.fileno():
                     clientConnection, clientAddress = serversocket.accept()
                     counter+=1
+                    #Set ClientConnection to non blocking
                     clientConnection.setblocking(0)
                     requests.update({clientConnection.fileno(): clientConnection})
+                    #Register EPOLLIN interest
                     epoll.register(clientConnection.fileno(), select.EPOLLIN | select.EPOLLET)
                     print (str(clientAddress) + " : " + " Just Connected. \n Currently connected clients: " + str(counter) + "\n")
                     text_file.write(str(clientAddress) + " : " + " Just Connected. \n Currently connected clients: " + str(counter) + "\n")
-
+                
+                #If a read event occured, get client data
                 elif event & select.EPOLLIN:
-                    receiveSock = requests.get(fileno)
-                    
+                    clientConection = requests.get(fileno)
+                    #Send Client data back
                     try:
-                        data = receiveSock.recv(bufferSize)
-                        #timeStamp = datetime.datetime.fromtimestamp(ts).strftime('%Y-%m-%d %H:%M:%S')
+                        data = clientConnection.recv(bufferSize)
+                        timeStamp = datetime.datetime.fromtimestamp(ts).strftime('%Y-%m-%d %H:%M:%S')
                         dataSize = len(data)
+                        #Add data of client message to total data
                         dataTotal += dataSize
-                        #text_file.write(str(timeStamp) + " - Size of data received (" + clientIP + ":" + str(clientSocket) + ") = " + str(dataSize) + '\n')
-                        receiveSock.send(data)
+                        #Log data received
+                        text_file.write(str(timeStamp) + " - Size of data received (" + clientIP + ":" + str(clientSocket) + ") = " + str(dataSize) + '\n')
+                        clientConnection.send(data)
                     except:
                         pass
 

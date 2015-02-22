@@ -20,6 +20,7 @@
 --  Design is a simple, single-threaded server using non-blocking, edge-triggered
 --  I/O to handle simultaneous inbound connections. 
 --  The program will also keep a log file of the number of connections and all data being echoed.
+--  This program is built for performance and does not output clients connected or log information such as amount of data transferred.
 --  Test with accompanying client application: echoClient.py
 '''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''
 import socket
@@ -47,13 +48,15 @@ import thread
 def run(hostIP, port):
     running = 1
     bufferSize = 1024
-    counter = 0
+    #Create an epoll object
     epoll = select.epoll()
-    requests = {};
+    #The connection dictionary maps file descriptors (integers) to their corresponding network connection objects.
+    requests = {}
     serversocket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
     #Register interest in read events on the server socket. A read event will occur any time the server socket accepts a socket connection.
     epoll.register(serversocket.fileno(), select.EPOLLIN | select.EPOLLET)
     requests.update({serversocket.fileno(): serversocket})
+    #This method allows a bind() to occur even if a program was recently bound to the port.
     serversocket.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
     serversocket.bind((hostIP, port))
     #The listen backlog queue size
@@ -64,30 +67,30 @@ def run(hostIP, port):
     
     
     try:
-        #The connection dictionary maps file descriptors (integers) to their corresponding network connection objects.
         
         while running:
             events = epoll.poll(-1)
             for fileno, event in events:
-                if fileno == serversocket.fileno():
+                # If a socket connection has been created
+                if fileno == serversocket.fileno(): 
                     clientConnection, clientAddress = serversocket.accept()
-                    
+                    #Set client connection to non blocking
                     clientConnection.setblocking(0)
                     requests.update({clientConnection.fileno(): clientConnection})
+                    #Register EPOLLIN interest.
                     epoll.register(clientConnection.fileno(), select.EPOLLIN | select.EPOLLET)
-                    
-
-
+                
+                #If a read event occured, get client data
                 elif event & select.EPOLLIN:
                     clientConnection = requests.get(fileno)
-                
+                    # Send client data back 
                     try:
                         data = clientConnection.recv(bufferSize)
                         clientConnection.send(data)
 		    except:
                         pass
 
-
+    # Handle a keyboard disconnect.
     except KeyboardInterrupt:
         print ("\nA keyboardInterruption has occured.")
         close(epoll, serversocket)
@@ -119,8 +122,6 @@ def close(epoll, serversocket):
     serversocket.close()            
 	
  
-
-
 if __name__=='__main__':
     
     hostIP = raw_input('Enter your host IP \n')
