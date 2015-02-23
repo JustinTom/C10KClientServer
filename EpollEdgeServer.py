@@ -1,8 +1,8 @@
 '''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''
---  SOURCE FILE:    EpollEdgeServer.py - A simple echo server using the edge triggered interface of the epoll API
+--  SOURCE FILE:    EpollEdgeServer-Testing.py - A simple echo server using the edge triggered interface of the epoll API
 --
---  PROGRAM:        Epoll method server using epoll edge-triggered
---                  python epollEdgeServer.py
+--  PROGRAM:        Select method server using epoll edge-triggered
+--                  python epollSelectServer.py
 --
 --  FUNCTIONS:      run(hostIP, port), close()
 --
@@ -20,9 +20,8 @@
 --  Design is a simple, single-threaded server using non-blocking, edge-triggered
 --  I/O to handle simultaneous inbound connections. 
 --  The program will also keep a log file of the number of connections and all data being echoed.
+--  This program is built for performance and does not output clients connected or log information such as amount of data transferred.
 --  Test with accompanying client application: echoClient.py
---  This Test also maintains a list of the clients connected, as well as how much data is being transferred to and from the client.
---  All of this data is also logged. 
 '''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''
 #!/usr/bin/env python
 import socket
@@ -30,6 +29,7 @@ import select
 import thread
 import datetime
 import time 
+
 
 '''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''
 --  FUNCTION
@@ -47,6 +47,7 @@ import time
 --      Listens on the specified socket for incoming data, sets a counter for connected clientSocket
 --      and echoes back the received data.
 '''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''  
+
 def run(hostIP, port):
     running = 1
     counter = 0
@@ -59,7 +60,7 @@ def run(hostIP, port):
     requests = {}
     serversocket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)  
     #Register interest in read events on the server socket. A read event will occur any time the server socket accepts a socket connection.
-    epoll.register(serversocket.fileno(), select.EPOLLIN | select.EPOLLET)
+    epoll.register(serversocket, select.EPOLLIN | select.EPOLLET)
     requests.update({serversocket.fileno(): serversocket})
     #This method allows a bind() to occur even if a program was recently bound to the port.
     serversocket.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
@@ -68,54 +69,54 @@ def run(hostIP, port):
     serversocket.listen(10000)
     #Since sockets are blocking by default, this is necessary to use non-blocking (asynchronous) mode.
     serversocket.setblocking(0)
+
+    
     
     try:
-       
+        
         while running:
             events = epoll.poll(-1)
             for fileno, event in events:
                 # If a socket connection has been created
-                if fileno == serversocket.fileno():
-                    clientConnection, clientAddress = serversocket.accept()
-                    counter+=1
-                    #Set ClientConnection to non blocking
-                    clientConnection.setblocking(0)
-                    requests.update({clientConnection.fileno(): clientConnection})
-                    #Register EPOLLIN interest
-                    epoll.register(clientConnection.fileno(), select.EPOLLIN | select.EPOLLET)
-                    print (str(clientAddress) + " : " + " Just Connected. \n Currently connected clients: " + str(counter) + "\n")
-                    text_file.write(str(clientAddress) + " : " + " Just Connected. \n Currently connected clients: " + str(counter) + "\n")
-                
-                #If a read event occured, get client data
+                if fileno == serversocket.fileno(): 
+                    while 1: 
+                        try: 
+                            clientConnection, clientAddress = serversocket.accept()
+                            counter +=1
+                            #Set client connection to non blocking
+                            clientConnection.setblocking(0)
+                            requests.update({clientConnection.fileno(): clientConnection})
+                            #Register EPOLLIN interest.
+                            epoll.register(clientConnection, select.EPOLLIN | select.EPOLLET)
+                            #If a read event occured, get client data
+                            print (str(clientAddress) + " : " + " Just Connected. \n Currently connected clients: " + str(counter) + "\n")
+                            text_file.write(str(clientAddress) + " : " + " Just Connected. \n Currently connected clients: " + str(counter) + "\n")
+                        except: 
+                            break
                 elif event & select.EPOLLIN:
-                    clientConection = requests.get(fileno)
-                    #Send Client data back
+                    clientConnection = requests.get(fileno)
+                    # Send client data back 
                     try:
                         data = clientConnection.recv(bufferSize)
-                        timeStamp = datetime.datetime.fromtimestamp(ts).strftime('%Y-%m-%d %H:%M:%S')
+                        #Get client IP and port
+                        clientIP, clientSocket = clientConnection.getpeername()
                         dataSize = len(data)
                         #Add data of client message to total data
                         dataTotal += dataSize
                         #Log data received
-                        text_file.write(str(timeStamp) + " - Size of data received (" + clientIP + ":" + str(clientSocket) + ") = " + str(dataSize) + '\n')
+                        text_file.write(str(getTime()) + " - Size of data received (" + clientIP + ":" + str(clientSocket) + ") = " + str(dataSize) + '\n')
                         clientConnection.send(data)
                     except:
                         pass
 
-
-                elif event & select.EPOLLERR:
-                    counter-=1
-                    
-                elif event & select.EPOLLHUP:
-                    counter-=1
-                    
+    # Handle a keyboard disconnect.
     except KeyboardInterrupt:
         print ("\nA keyboardInterruption has occured.")
-        close(epoll, serversocket, counter, dataTotal)
+        close(epoll, serversocket)
     
     except Exception,e:
         print ("Unknown Error has occured." + str(e))
-        close(epoll, serversocket, counter, dataTotal)
+        close(epoll, serversocket)
 
 '''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''
 --  FUNCTION
@@ -124,30 +125,20 @@ def run(hostIP, port):
 --  Created On: Feb. 10, 2015
 --  Parameters:
 --      epoll
---          Epoll object required to close and clean up
+--          Required to pass the variable to the next function
 --      serversocket
---          Server socket object required to close it
---      counter
---          Counter for total amount of connections.
---      dataReceivedTotal
---          Total number of data bytes received from the client to the server
---      dataSentTotal
---          Total number of data bytes sent to the client from server
+--          Required to pass the variable to the next function
 --  Return Values:
 --      none
 --  Description:
 --    Cleans up and closes the epoll objects, and sockets as well as closing the log text file.
-'''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''  
-def close(epoll, serversocket, counter, dataTotal):
- 
+'''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''        
+                
+def close(epoll, serversocket):
     epoll.unregister(serversocket.fileno())
     epoll.close()
-    print ("\nClosing the server...")
-    serversocket.close()
-    text_file.write("\n\nTotal number of connections: " + str(counter))
-    text_file.write("\nTotal amount of data transferred: " + str(dataTotal))
-    text_file.close()
-    return                
+    print("\nClosing the server...")
+    serversocket.close()            
 
 
 '''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''
@@ -168,14 +159,13 @@ def getTime():
     timeStamp = datetime.datetime.fromtimestamp(ts).strftime('%Y-%m-%d_%H:%M:%S')
     return timeStamp         
 
-if __name__ == '__main__':
+ 
+if __name__=='__main__':
+    
     hostIP = raw_input('Enter your host IP \n')
     port = int(input('What port would you like to use?\n'))
- 
     text_file = open(str(getTime()) + "_EpollEdgeServerLog.txt", "w")
 
     #Create and initialize the text file with the date in the filename in the logfiles directory
     #text_file = open("./Logfiles/" + str(getTime()) + "_SelectServerLog.txt", "w")
-    
     run(hostIP, port)
-               

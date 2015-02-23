@@ -54,7 +54,7 @@ def run(hostIP, port):
     requests = {}
     serversocket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
     #Register interest in read events on the server socket. A read event will occur any time the server socket accepts a socket connection.
-    epoll.register(serversocket.fileno(), select.EPOLLIN | select.EPOLLET)
+    epoll.register(serversocket, select.EPOLLIN | select.EPOLLET)
     #Add server filno to array
     requests.update({serversocket.fileno(): serversocket})
     #This method allows a bind() to occur even if a program was recently bound to the port.
@@ -74,21 +74,24 @@ def run(hostIP, port):
             for fileno, event in events:
                 # If a socket connection has been created
                 if fileno == serversocket.fileno(): 
-                    clientConnection, clientAddress = serversocket.accept()
-                    #Set client connection to non blocking
-                    clientConnection.setblocking(0)
-                    requests.update({clientConnection.fileno(): clientConnection})
-                    #Register EPOLLIN interest.
-                    epoll.register(clientConnection.fileno(), select.EPOLLIN | select.EPOLLET)
-                
-                #If a read event occured, get client data
+                    while 1: 
+                        try: 
+                            clientConnection, clientAddress = serversocket.accept()
+                            #Set client connection to non blocking
+                            clientConnection.setblocking(0)
+                            requests.update({clientConnection.fileno(): clientConnection})
+                            #Register EPOLLIN interest.
+                            epoll.register(clientConnection, select.EPOLLIN | select.EPOLLET)
+                            #If a read event occured, get client data
+                        except: 
+                            break
                 elif event & select.EPOLLIN:
                     clientConnection = requests.get(fileno)
                     # Send client data back 
                     try:
                         data = clientConnection.recv(bufferSize)
                         clientConnection.send(data)
-		    except:
+                    except:
                         pass
 
     # Handle a keyboard disconnect.
@@ -96,9 +99,9 @@ def run(hostIP, port):
         print ("\nA keyboardInterruption has occured.")
         close(epoll, serversocket)
     
-    #except Exception,e:
-        #print ("Unknown Error has occured." + str(e))
-        #close(epoll, serversocket)
+    except Exception,e:
+        print ("Unknown Error has occured." + str(e))
+        close(epoll, serversocket)
 
 '''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''
 --  FUNCTION
@@ -121,7 +124,7 @@ def close(epoll, serversocket):
     epoll.close()
     print("\nClosing the server...")
     serversocket.close()            
-	
+    
  
 if __name__=='__main__':
     
