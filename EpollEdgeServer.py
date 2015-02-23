@@ -4,7 +4,7 @@
 --  PROGRAM:        Select method server using epoll edge-triggered
 --                  python epollSelectServer.py
 --
---  FUNCTIONS:      run(hostIP, port), close(epoll, serversocket), getTime()
+--  FUNCTIONS:      run(hostIP, port), close(epoll, serversocket, counter, dataTotal), getTime()
 --
 --  DATE:           February 10, 2015
 --
@@ -112,11 +112,11 @@ def run(hostIP, port):
     # Handle a keyboard disconnect.
     except KeyboardInterrupt:
         print ("\nA keyboardInterruption has occured.")
-        close(epoll, serversocket)
+        close(epoll, serversocket, counter, dataTotal)
     
     except Exception,e:
         print ("Unknown Error has occured." + str(e))
-        close(epoll, serversocket)
+        close(epoll, serversocket, counter, dataTotal)
 
 '''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''
 --  FUNCTION
@@ -134,12 +134,15 @@ def run(hostIP, port):
 --    Cleans up and closes the epoll objects, and sockets as well as closing the log text file.
 '''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''        
                 
-def close(epoll, serversocket):
+def close(epoll, serversocket, counter, dataTotal):
+    print("\nClosing the server...")
     epoll.unregister(serversocket.fileno())
     epoll.close()
-    print("\nClosing the server...")
     serversocket.close()            
 
+    text_file.write("\n\nTotal number of connections: " + str(counter))
+    text_file.write("Total amount of data transfered: " + str(dataTotal))
+    text_file.close()
 
 '''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''
 --  FUNCTION

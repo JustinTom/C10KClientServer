@@ -4,7 +4,7 @@
 --  PROGRAM:        Multi threaded method server
 --                  python MultiThreadedServer.py
 --
---  FUNCTIONS:      threadHandler(clientsocket, clientaddr), run(hostIP, port), close()
+--  FUNCTIONS:      threadHandler(clientsocket, clientaddr), run(hostIP, port), close(counter, dataReceivedTotal, dataSentTotal)
 --
 --  DATE:           February 10, 2015
 --
@@ -76,8 +76,9 @@ def threadHandler(clientsocket, clientaddr):
 --  Description:
 --    Cleans up and closes the epoll objects, and sockets as well as closing the log text file.
 '''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''  
-def close():
+def close(counter, dataReceivedTotal, dataSentTotal):
     print ("Closing the server...")
+    serversocket.close()
     text_file.write("\n\nTotal number of connections: " + str(counter))
     text_file.write("\nTotal amount of data received: " + str(dataReceivedTotal))
     text_file.write("\nTotal amount of data sent: " + str(dataSentTotal))
@@ -137,13 +138,13 @@ if __name__ == '__main__':
     
     except KeyboardInterrupt:
         print ("A keyboardInterruption has occured.")
-        close()
+        close(counter, dataReceivedTotal, dataSentTotal)
         
         
     
     except Exception,e:
         print ("Unknown Error has occured." + str(e))
-        close()
+        close(counter, dataReceivedTotal, dataSentTotal)
         
         
     
