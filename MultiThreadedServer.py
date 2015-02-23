@@ -4,7 +4,7 @@
 --  PROGRAM:        Multi threaded method server
 --                  python MultiThreadedServer.py
 --
---  FUNCTIONS:      run(hostIP, port), close()
+--  FUNCTIONS:      threadHandler(clientsocket, clientaddr), run(hostIP, port), close()
 --
 --  DATE:           February 10, 2015
 --
@@ -110,7 +110,8 @@ if __name__ == '__main__':
     connections = []
     counter = 0
     #Maintain amount of data sent to and from server
-    dataTotal = 0
+    dataReceivedTotal = 0
+    dataSentTotal = 0
     bufferSize = 1024
     #Create and initialize the text file with the date in the filename in the logfiles directory   
     text_file = open("./Logfiles/" + str(getTime()) + "_MultiThreadedServerLog.txt", "w")
@@ -130,7 +131,7 @@ if __name__ == '__main__':
             counter += 1
             #Log client information
             print (str(clientaddr) + " : " + " Just Connected. \n Currently connected clients: " + str(counter) + "\n")
-            text_file.write(str(getTime()) + " - " str(clientaddr) + " : " + " Just Connected. \n Currently connected clients: " + str(counter) + "\n")
+            text_file.write(str(getTime()) + " - " + str(clientaddr) + " : " + " Just Connected. \n Currently connected clients: " + str(counter) + "\n")
             clientThread = threading.Thread(target = threadHandler, args=(clientsocket, clientaddr))
             clientThread.start()
     

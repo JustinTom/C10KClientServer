@@ -4,7 +4,7 @@
 --  PROGRAM:        Select method server using epoll edge-triggered
 --                  python epollSelectServer.py
 --
---  FUNCTIONS:      run(hostIP, port), close()
+--  FUNCTIONS:      run(hostIP, port), close(epoll, serversocket), getTime()
 --
 --  DATE:           February 10, 2015
 --
@@ -161,11 +161,10 @@ def getTime():
 
  
 if __name__=='__main__':
-    
     hostIP = raw_input('Enter your host IP \n')
     port = int(input('What port would you like to use?\n'))
-    text_file = open(str(getTime()) + "_EpollEdgeServerLog.txt", "w")
 
     #Create and initialize the text file with the date in the filename in the logfiles directory
-    #text_file = open("./Logfiles/" + str(getTime()) + "_SelectServerLog.txt", "w")
+    text_file = open("./Logfiles/" + str(getTime()) + "_EpollServerLog.txt", "w")
+
     run(hostIP, port)
